@@ -222,8 +222,6 @@ FlowAuth는 오픈소스 프로젝트입니다! 기여를 환영합니다:
 - **이슈**: [GitHub Issues](https://github.com/your-username/FlowAuth/issues)
 - **토론**: [GitHub Discussions](https://github.com/your-username/FlowAuth/discussions)
 
----
-
 ## 📚 API 문서
 
 백엔드 서버 실행 후 다음 엔드포인트에서 API 문서를 확인할 수 있습니다:
