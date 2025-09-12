@@ -84,17 +84,46 @@ FlowAuth/
 
 ### 환경 변수 설정
 
-백엔드의 `.env` 파일에 다음 변수를 설정하세요:
+백엔드의 `.env` 파일에 다음 변수를 설정하세요. `.env.example` 파일을 복사해서 사용하세요:
+
+```bash
+cp .env.example .env
+```
+
+주요 환경 변수들:
 
 ```env
+# Database Configuration
 DB_HOST=localhost
 DB_PORT=3306
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+DB_USERNAME=root
+DB_PASSWORD=your_password_here
 DB_NAME=flowauth
 
-JWT_SECRET=your_jwt_secret
+# Application Configuration
+PORT=3000
+NODE_ENV=development
+
+# Frontend Configuration (for CORS)
+FRONTEND_URL=http://localhost:5173
+
+# JWT Configuration
+JWT_SECRET=your_super_secret_jwt_key_here
+JWT_EXPIRES_IN=1h
+JWT_REFRESH_EXPIRES_IN=7d
+
+# OAuth2 Configuration
+OAUTH2_DEFAULT_REDIRECT_URI=http://localhost:3000/auth/callback
+OAUTH2_SUPPORTED_GRANTS=authorization_code,refresh_token,password,client_credentials
+
+# Security Configuration
+BCRYPT_SALT_ROUNDS=10
 ```
+
+**보안 주의사항:**
+
+- 실제 운영 환경에서는 강력한 비밀번호와 JWT 시크릿을 사용하세요
+- `.env` 파일은 절대 Git에 커밋하지 마세요 (이미 .gitignore에 포함됨)
 
 ## 🔧 개발
 
