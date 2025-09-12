@@ -217,21 +217,12 @@ FlowAuth는 오픈소스 프로젝트입니다! 기여를 환영합니다:
 - 의미 있는 커밋 메시지 작성
 - 테스트 코드 포함
 
-## 📄 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 있습니다.
-
 ## 📞 문의
 
 - **이슈**: [GitHub Issues](https://github.com/your-username/FlowAuth/issues)
 - **토론**: [GitHub Discussions](https://github.com/your-username/FlowAuth/discussions)
 
 ---
-
-**FlowAuth** - 현대적인 OAuth2 인증 시스템 🚀
-npm run test
-
-```
 
 ## 📚 API 문서
 
@@ -250,4 +241,3 @@ npm run test
 ## 📄 라이선스
 
 이 프로젝트는 MIT 라이선스 하에 있습니다.
-```
