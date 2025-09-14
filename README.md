@@ -197,21 +197,6 @@ npm run lint          # 코드 린팅
 - [ ] Docker 컨테이너화
 - [ ] CI/CD 파이프라인 구축
 
-## 🤝 기여하기
-
-FlowAuth는 오픈소스 프로젝트입니다! 기여를 환영합니다:
-
-1. **이슈 생성**: 버그 리포트 또는 기능 제안
-2. **풀 리퀘스트**: 코드 개선 또는 새로운 기능
-3. **문서화**: README 또는 API 문서 개선
-
-### 기여 가이드라인
-
-- TypeScript 엄격 모드 준수
-- ESLint/Prettier 규칙 따르기
-- 의미 있는 커밋 메시지 작성
-- 테스트 코드 포함
-
 ## 📞 문의
 
 - **이슈**: [GitHub Issues](https://github.com/your-username/FlowAuth/issues)
