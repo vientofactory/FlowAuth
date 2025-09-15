@@ -17,55 +17,108 @@ FlowAuth는 OAuth2 표준을 준수하는 모던한 인증 및 권한 부여 시
 - **TypeORM 통합**: 효율적인 데이터베이스 관리
 - **TypeScript 지원**: 타입 안전성과 개발 생산성 향상
 - **완전한 토큰 관리**: 액세스/리프레시 토큰 생성, 조회, 취소
+- **PKCE 지원**: Proof Key for Code Exchange 보안 강화
+- **환경 변수 기반 설정**: 유연한 배포 환경 지원
 
-## ✅ 완료된 기능들
+## 🏗️ 아키텍처 개요
 
-### 🎨 프론트엔드
+```mermaid
+flowchart LR
+   FE[Frontend<br/>SvelteKit]
+   BE[Backend<br/>NestJS]
+   DB[Database<br/>MySQL]
 
-- **현대적인 메인 페이지**: 그라데이션 배경과 애니메이션 효과
-- **인증 시스템**: 회원가입, 로그인, 프로필 관리 페이지
-- **사용자 대시보드**: 완전한 대시보드 UI 및 네비게이션
-- **OAuth2 동의 페이지**: 사용자 권한 승인 인터페이스
-- **클라이언트 관리**: OAuth2 애플리케이션 등록 및 관리
-- **토큰 관리**: 발급된 토큰 조회 및 취소 기능
-- **OAuth2 테스터**: 개발자용 OAuth2 플로우 테스트 도구
-- **컴포넌트 라이브러리**: Button, Input, Card, Badge, Modal 등 완전한 컴포넌트 시스템
-- **TailwindCSS 통합**: 커스텀 디자인 시스템
-- **Font Awesome 아이콘**: 모든 아이콘 통합
-- **반응형 디자인**: 모바일 우선 접근 방식
-- **API 클라이언트**: 타입 안전한 API 통신
-- **Toast 알림 시스템**: 사용자 피드백 시스템
+   FE <--> BE
+   BE <--> DB
 
-### 🔧 백엔드
+   subgraph "Frontend Layer"
+      FE_UI[사용자 인터페이스]
+      FE_Tester[OAuth2 테스터]
+      FE_Dashboard[대시보드]
+      FE_Consent[동의 페이지]
+   end
 
-- **완전한 OAuth2 구현**: Authorization Code Grant 플로우
-- **사용자 관리**: 등록, 로그인, 프로필 관리 API
-- **클라이언트 관리**: OAuth2 클라이언트 CRUD 작업
-- **토큰 관리**: 액세스 토큰 및 리프레시 토큰 생성/관리
-- **권한 범위(Scope) 시스템**: 세밀한 권한 제어
-- **인가 코드 관리**: 보안 인가 코드 생성 및 검증
-- **JWT 인증**: 안전한 토큰 기반 인증
-- **보안 강화**: 헬멧, CORS, 레이트 리미팅 적용
-- **데이터베이스**: TypeORM으로 완전한 모델링
-- **API 문서화**: Swagger를 통한 자동 문서 생성
-- **데이터 시딩**: 개발용 초기 데이터 생성
+   subgraph "Backend Layer"
+      BE_OAuth2[OAuth2 서버]
+      BE_JWT[JWT 인증]
+      BE_Token[토큰 관리]
+      BE_API[API 엔드포인트]
+   end
 
-## 🛠 기술 스택
+   subgraph "Database Layer"
+      DB_User[사용자 정보]
+      DB_Client[클라이언트 정보]
+      DB_Token[토큰 저장]
+      DB_Scope[권한 범위]
+   end
 
-### Backend
+   FE --> FE_UI
+   FE --> FE_Tester
+   FE --> FE_Dashboard
+   FE --> FE_Consent
 
-- **Framework**: NestJS
-- **Database**: MySQL + TypeORM
-- **Authentication**: Passport.js + JWT
-- **Language**: TypeScript
-- **Testing**: Jest
+   BE --> BE_OAuth2
+   BE --> BE_JWT
+   BE --> BE_Token
+   BE --> BE_API
 
-### Frontend
+   DB --> DB_User
+   DB --> DB_Client
+   DB --> DB_Token
+   DB --> DB_Scope
+```
 
-- **Framework**: SvelteKit
-- **Styling**: TailwindCSS
-- **Language**: TypeScript
-- **Build Tool**: Vite
+## � 시스템 요구사항
+
+- **Node.js**: v18 이상
+- **Database**: MySQL 8.0 이상 (또는 호환되는 데이터베이스)
+- **Package Manager**: npm 또는 yarn
+
+## 🛠️ 빠른 시작
+
+### 1. 저장소 클론
+
+```bash
+git clone https://github.com/vientofactory/FlowAuth.git
+cd FlowAuth
+```
+
+### 2. 백엔드 설정
+
+```bash
+cd backend
+
+# 의존성 설치
+npm install
+
+# 환경 변수 설정
+cp .env.example .env
+# .env 파일을 편집하여 데이터베이스 및 기타 설정을 구성하세요
+
+# 데이터베이스 마이그레이션 실행
+npm run migration:run
+
+# 개발 서버 시작
+npm run start:dev
+```
+
+### 3. 프론트엔드 설정
+
+```bash
+cd ../frontend
+
+# 의존성 설치
+npm install
+
+# 개발 서버 시작
+npm run dev
+```
+
+### 4. 애플리케이션 접속
+
+- **프론트엔드**: http://localhost:5173
+- **백엔드 API**: http://localhost:3000
+- **API 문서**: http://localhost:3000/api
 
 ## 📁 프로젝트 구조
 
@@ -242,9 +295,69 @@ npm run lint          # 코드 린팅
 
 ## 📚 API 문서
 
-백엔드 서버 실행 후 다음 엔드포인트에서 API 문서를 확인할 수 있습니다:
+백엔드 서버 실행 후 다음에서 API 문서를 확인할 수 있습니다:
 
-- Swagger UI: `http://localhost:3000/api`
+- **Swagger UI**: http://localhost:3000/api
+
+## 🔒 보안 기능
+
+- **JWT 토큰 기반 인증**
+- **비밀번호 해싱 (bcrypt)**
+- **헬멧 (Helmet) 보안 헤더**
+- **CORS 설정**
+- **레이트 리미팅**
+- **PKCE (Proof Key for Code Exchange) 지원**
+- **인가 코드 만료 (환경 변수로 설정 가능)**
+- **토큰 만료 관리**
+
+## 📊 프로젝트 상태
+
+### ✅ 완료된 기능들
+
+#### 🎨 프론트엔드
+
+- **현대적인 메인 페이지**: 그라데이션 배경과 애니메이션 효과
+- **인증 시스템**: 회원가입, 로그인, 프로필 관리 페이지
+- **사용자 대시보드**: 완전한 대시보드 UI 및 네비게이션
+- **OAuth2 동의 페이지**: 사용자 권한 승인 인터페이스
+- **클라이언트 관리**: OAuth2 애플리케이션 등록 및 관리
+- **토큰 관리**: 발급된 토큰 조회 및 취소 기능
+- **OAuth2 테스터**: 개발자용 OAuth2 플로우 테스트 도구
+- **컴포넌트 라이브러리**: Button, Input, Card, Badge, Modal 등 완전한 컴포넌트 시스템
+- **TailwindCSS 통합**: 커스텀 디자인 시스템
+- **Font Awesome 아이콘**: 모든 아이콘 통합
+- **반응형 디자인**: 모바일 우선 접근 방식
+- **API 클라이언트**: 타입 안전한 API 통신
+- **Toast 알림 시스템**: 사용자 피드백 시스템
+
+#### 🔧 백엔드
+
+- **완전한 OAuth2 구현**: Authorization Code Grant 플로우
+- **사용자 관리**: 등록, 로그인, 프로필 관리 API
+- **클라이언트 관리**: OAuth2 클라이언트 CRUD 작업
+- **토큰 관리**: 액세스 토큰 및 리프레시 토큰 생성/관리
+- **권한 범위(Scope) 시스템**: 세밀한 권한 제어
+- **인가 코드 관리**: 보안 인가 코드 생성 및 검증
+- **JWT 인증**: 안전한 토큰 기반 인증
+- **보안 강화**: 헬멧, CORS, 레이트 리미팅 적용
+- **데이터베이스**: TypeORM으로 완전한 모델링
+- **API 문서화**: Swagger를 통한 자동 문서 생성
+- **데이터 시딩**: 개발용 초기 데이터 생성
+
+### 🔄 진행 중인 작업
+
+- [ ] 관리자 페이지 개발
+- [ ] 고급 보안 기능 (2FA, 세션 관리)
+- [ ] 사용자 설정 페이지 완성
+
+### 📋 향후 계획
+
+- [ ] 통합 테스트 및 QA
+- [ ] Docker 컨테이너화
+- [ ] CI/CD 파이프라인 구축
+- [ ] 프로덕션 배포 가이드
+- [ ] 성능 최적화
+- [ ] 모니터링 및 로깅 시스템
 
 ## 🤝 기여하기
 
@@ -254,6 +367,21 @@ npm run lint          # 코드 린팅
 4. 브랜치에 Push 하세요 (`git push origin feature/AmazingFeature`)
 5. Pull Request를 생성하세요
 
+## 📞 문의 및 지원
+
+- **이슈**: [GitHub Issues](https://github.com/vientofactory/FlowAuth/issues)
+- **토론**: [GitHub Discussions](https://github.com/vientofactory/FlowAuth/discussions)
+
 ## 📄 라이선스
 
 이 프로젝트는 MIT 라이선스 하에 있습니다.
+
+---
+
+<div align="center">
+
+**FlowAuth** - 모던한 OAuth2 인증 시스템
+
+[🌐 웹사이트](https://flowauth.dev) • [📚 문서](https://docs.flowauth.dev) • [🐛 이슈](https://github.com/vientofactory/FlowAuth/issues)
+
+</div>
