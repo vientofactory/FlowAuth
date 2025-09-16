@@ -116,6 +116,8 @@ npm run dev
 
 ### 4. 애플리케이션 접속
 
+첫 가입 계정에 자동으로 시스템에서 가장 높은 권한이 부여됩니다.
+
 - **프론트엔드**: http://localhost:5173
 - **백엔드 API**: http://localhost:3000
 - **API 문서**: http://localhost:3000/api
