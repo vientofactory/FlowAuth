@@ -70,59 +70,43 @@ flowchart LR
    DB --> DB_Scope
 ```
 
-## � 시스템 요구사항
+## 📋 시스템 요구사항
 
 - **Node.js**: v18 이상
-- **Database**: MySQL 8.0 이상 (또는 호환되는 데이터베이스)
-- **Package Manager**: npm 또는 yarn
+- **MySQL**: 8.0 이상 (또는 다른 지원 데이터베이스)
+- **npm** 또는 **yarn**
+- **Git**: 서브모듈 지원
 
 ## 🛠️ 빠른 시작
 
-### 1. 저장소 클론
+1. **프로젝트 클론** (서브모듈 포함):
 
-```bash
-git clone https://github.com/vientofactory/FlowAuth.git
-cd FlowAuth
-```
+   ```bash
+   git clone --recursive https://github.com/vientofactory/FlowAuth.git
+   cd FlowAuth
+   ```
 
-### 2. 백엔드 설정
+2. **백엔드 실행**:
 
-```bash
-cd backend
+   ```bash
+   cd backend
+   npm install
+   cp .env.example .env  # 환경 변수 설정
+   npm run start:dev
+   ```
 
-# 의존성 설치
-npm install
+3. **프론트엔드 실행** (새 터미널에서):
 
-# 환경 변수 설정
-cp .env.example .env
-# .env 파일을 편집하여 데이터베이스 및 기타 설정을 구성하세요
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-# 데이터베이스 마이그레이션 실행
-npm run migration:run
-
-# 개발 서버 시작
-npm run start:dev
-```
-
-### 3. 프론트엔드 설정
-
-```bash
-cd ../frontend
-
-# 의존성 설치
-npm install
-
-# 개발 서버 시작
-npm run dev
-```
-
-### 4. 애플리케이션 접속
-
-첫 가입 계정에 자동으로 시스템에서 가장 높은 권한이 부여됩니다.
-
-- **프론트엔드**: http://localhost:5173
-- **백엔드 API**: http://localhost:3000
-- **API 문서**: http://localhost:3000/api
+4. **브라우저에서 접속**:
+   - 프론트엔드: http://localhost:5173
+   - 백엔드 API: http://localhost:3000
+   - API 문서: http://localhost:3000/api
 
 ## 📁 프로젝트 구조
 
@@ -159,49 +143,9 @@ FlowAuth/
 └── README.md
 ```
 
-## 🚀 시작하기
+## ⚙️ 환경 설정
 
-### 사전 요구사항
-
-- **Node.js**: v18 이상
-- **MySQL**: 8.0 이상 (또는 다른 지원 데이터베이스)
-- **npm** 또는 **yarn**
-- **Git**: 서브모듈 지원
-
-### ⚡ 빠른 시작
-
-1. **프로젝트 클론** (서브모듈 포함):
-
-   ```bash
-   git clone --recursive https://github.com/your-username/FlowAuth.git
-   cd FlowAuth
-   ```
-
-2. **백엔드 실행**:
-
-   ```bash
-   cd backend
-   npm install
-   cp .env.example .env  # 환경 변수 설정
-   npm run start:dev
-   ```
-
-3. **프론트엔드 실행** (새 터미널에서):
-
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-
-4. **브라우저에서 접속**:
-   - 프론트엔드: http://localhost:5173
-   - 백엔드 API: http://localhost:3000
-   - API 문서: http://localhost:3000/api
-
-### 🔧 환경 설정
-
-#### 백엔드 (.env 파일)
+### 백엔드 (.env 파일)
 
 ```env
 # 데이터베이스 설정
@@ -223,7 +167,7 @@ JWT_EXPIRES_IN=1h
 BCRYPT_SALT_ROUNDS=10
 ```
 
-#### 데이터베이스 초기화
+### 데이터베이스 초기화
 
 ```bash
 # 백엔드에서 마이그레이션 실행
@@ -263,58 +207,7 @@ npm run preview       # 빌드 미리보기
 npm run lint          # 코드 린팅
 ```
 
-## 📊 프로젝트 상태
-
-### ✅ 완료된 기능들
-
-- [x] **프론트엔드 UI/UX**: 현대적인 디자인 시스템 및 완전한 컴포넌트 라이브러리
-- [x] **백엔드 API**: 사용자 및 클라이언트 관리 완전 구현
-- [x] **OAuth2 시스템**: Authorization Code Grant 플로우 완전 구현
-- [x] **인증 시스템**: JWT 기반 로그인/회원가입 시스템
-- [x] **사용자 대시보드**: 클라이언트, 토큰, 프로필 관리 대시보드
-- [x] **OAuth2 테스터**: 개발자용 OAuth2 플로우 테스트 도구
-- [x] **데이터베이스**: 완전한 스키마 및 마이그레이션
-- [x] **보안**: JWT, bcrypt, CORS, 헬멧 적용
-- [x] **문서화**: Swagger API 문서 자동 생성
-
-### 🔄 진행 중
-
-- [ ] 관리자 페이지 개발
-- [ ] 고급 보안 기능 (2FA, 세션 관리)
-- [ ] 사용자 설정 페이지 완성
-
-### 📋 다음 단계
-
-- [ ] 통합 테스트 및 QA
-- [ ] Docker 컨테이너화
-- [ ] CI/CD 파이프라인 구축
-- [ ] 프로덕션 배포 가이드
-- [ ] 성능 최적화
-- [ ] 모니터링 및 로깅 시스템
-
-## 📞 문의
-
-- **이슈**: [GitHub Issues](https://github.com/your-username/FlowAuth/issues)
-- **토론**: [GitHub Discussions](https://github.com/your-username/FlowAuth/discussions)
-
-## 📚 API 문서
-
-백엔드 서버 실행 후 다음에서 API 문서를 확인할 수 있습니다:
-
-- **Swagger UI**: http://localhost:3000/api
-
-## 🔒 보안 기능
-
-- **JWT 토큰 기반 인증**
-- **비밀번호 해싱 (bcrypt)**
-- **헬멧 (Helmet) 보안 헤더**
-- **CORS 설정**
-- **레이트 리미팅**
-- **PKCE (Proof Key for Code Exchange) 지원**
-- **인가 코드 만료 (환경 변수로 설정 가능)**
-- **토큰 만료 관리**
-
-## 📊 프로젝트 상태
+## 프로젝트 상태
 
 ### ✅ 완료된 기능들
 
@@ -362,6 +255,23 @@ npm run lint          # 코드 린팅
 - [ ] 프로덕션 배포 가이드
 - [ ] 성능 최적화
 - [ ] 모니터링 및 로깅 시스템
+
+## 📚 API 문서
+
+백엔드 서버 실행 후 다음에서 API 문서를 확인할 수 있습니다:
+
+- **Swagger UI**: http://localhost:3000/api
+
+## 🔒 보안 기능
+
+- **JWT 토큰 기반 인증**
+- **비밀번호 해싱 (bcrypt)**
+- **헬멧 (Helmet) 보안 헤더**
+- **CORS 설정**
+- **레이트 리미팅**
+- **PKCE (Proof Key for Code Exchange) 지원**
+- **인가 코드 만료 (환경 변수로 설정 가능)**
+- **토큰 만료 관리**
 
 ## 🤝 기여하기
 
