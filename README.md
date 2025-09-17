@@ -275,8 +275,8 @@ npm run lint          # 코드 린팅
 
 ## 🤝 기여하기
 
-1. 이 리포지토리를 Fork 하세요
-2. Feature 브랜치를 생성하세요 (`git checkout -b feature/AmazingFeature`)
+1. 이 리포지토리를 서브모듈과 함께 Fork 하세요
+2. 백엔드/프론트엔드 리포지토리로 이동 후 Feature 브랜치를 생성하세요 (`git checkout -b feature/AmazingFeature`)
 3. 변경사항을 커밋하세요 (`git commit -m 'Add some AmazingFeature'`)
 4. 브랜치에 Push 하세요 (`git push origin feature/AmazingFeature`)
 5. Pull Request를 생성하세요
