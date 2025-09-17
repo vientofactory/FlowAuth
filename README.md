@@ -3,7 +3,9 @@
 > [!NOTE]
 > 이 프로젝트는 아직 개발 중인 미완성 상태입니다. 많은 기능이 추가될 예정이며, 누구나 자유롭게 기여하실 수 있습니다!
 
-FlowAuth는 OAuth2 표준을 준수하는 모던한 인증 및 권한 부여 시스템입니다. 외부 서비스 제공자들이 쉽게 애플리케이션을 등록하고 관리할 수 있는 플랫폼을 제공합니다.
+<img width="600" height="164" alt="logo_1" src="https://github.com/user-attachments/assets/04383214-745c-4b18-8545-36c3cda04ee6" />
+
+FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을 준수하는 모던한 인증 및 권한 부여 시스템입니다. 외부 서비스 제공자들이 쉽게 애플리케이션을 등록하고 관리할 수 있는 플랫폼을 제공합니다.
 
 ## 🚀 특징
 
@@ -377,13 +379,3 @@ npm run lint          # 코드 린팅
 ## 📄 라이선스
 
 이 프로젝트는 MIT 라이선스 하에 있습니다.
-
----
-
-<div align="center">
-
-**FlowAuth** - 모던한 OAuth2 인증 시스템
-
-[🌐 웹사이트](https://flowauth.dev) • [📚 문서](https://docs.flowauth.dev) • [🐛 이슈](https://github.com/vientofactory/FlowAuth/issues)
-
-</div>
