@@ -273,13 +273,26 @@ npm run lint          # 코드 린팅
 - **인가 코드 만료 (환경 변수로 설정 가능)**
 - **토큰 만료 관리**
 
-## 🤝 기여하기
+## 🤝 기여 가이드
 
-1. 이 리포지토리를 서브모듈과 함께 Fork 하세요
-2. 백엔드/프론트엔드 리포지토리로 이동 후 Feature 브랜치를 생성하세요 (`git checkout -b feature/AmazingFeature`)
-3. 변경사항을 커밋하세요 (`git commit -m 'Add some AmazingFeature'`)
-4. 브랜치에 Push 하세요 (`git push origin feature/AmazingFeature`)
-5. Pull Request를 생성하세요
+FlowAuth는 모든 개발자의 기여를 환영합니다! 아래 절차에 따라 자유롭게 참여해 주세요.
+
+1. **Fork**: 백엔드 또는 프론트엔드 리포지토리를 자신의 GitHub 계정으로 포크하세요.
+   > ⚠️ 이 메인 리포지토리는 서브모듈 관리용입니다. 실제 코드 변경은 각 하위 리포지토리에서 진행해 주세요.
+2. **브랜치 생성**: 새로운 기능 또는 버그 수정을 위한 브랜치를 만드세요.
+   ```bash
+   git checkout -b feature/YourFeatureName
+   ```
+3. **커밋**: 변경사항을 명확한 메시지와 함께 커밋하세요.
+   ```bash
+   git commit -m "feat: Your concise commit message"
+   ```
+4. **푸시**: 작업한 브랜치를 자신의 원격 저장소에 푸시하세요.
+   ```bash
+   git push origin feature/YourFeatureName
+   ```
+5. **Pull Request 생성**: GitHub에서 Pull Request를 생성하고, 변경 내용을 설명해 주세요.
+6. **리뷰 및 반영**: 리뷰어의 피드백을 반영해 주세요.
 
 ## 📞 문의 및 지원
 
