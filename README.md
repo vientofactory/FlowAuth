@@ -22,6 +22,7 @@ FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을
 - **PKCE 지원**: Proof Key for Code Exchange 보안 강화
 - **환경 변수 기반 설정**: 유연한 배포 환경 지원
 - **2단계 인증 (2FA)**: TOTP 기반 보안 강화
+- **reCAPTCHA v3 통합**: 봇 공격 방지를 위한 Google reCAPTCHA v3 지원
 - **사용자 유형 분리**: 일반 사용자와 개발자 역할 구분
 - **맞춤형 대시보드**: 사용자 유형별 최적화된 인터페이스
 - **역할 기반 접근 제어**: 세밀한 권한 관리 시스템
@@ -173,6 +174,19 @@ JWT_EXPIRES_IN=1h
 
 # 보안 설정
 BCRYPT_SALT_ROUNDS=10
+
+# reCAPTCHA 설정 (선택사항)
+RECAPTCHA_SECRET_KEY=your_recaptcha_secret_key_here
+```
+
+### 프론트엔드 (.env 파일)
+
+```env
+# API 서버 설정
+VITE_API_BASE_URL=http://localhost:3000
+
+# reCAPTCHA 설정 (선택사항)
+VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key_here
 ```
 
 ### 데이터베이스 초기화
@@ -183,7 +197,57 @@ cd backend
 npm run migration:run
 ```
 
-## 🔧 개발 가이드
+## �️ reCAPTCHA 설정 (선택사항)
+
+FlowAuth는 Google reCAPTCHA v3를 지원하여 봇 공격으로부터 인증 시스템을 보호합니다.
+
+### 1. Google reCAPTCHA 콘솔에서 키 발급
+
+1. [Google reCAPTCHA 콘솔](https://www.google.com/recaptcha/admin)로 이동
+2. "Create" 버튼을 클릭하여 새 사이트를 등록
+3. reCAPTCHA 유형을 **"v3"**로 선택
+4. 도메인을 등록 (로컬 개발 시: `localhost`)
+5. 이용약관에 동의하고 제출
+
+### 2. 키 설정
+
+발급받은 키를 환경 변수에 설정:
+
+**백엔드 (.env)**:
+
+```env
+RECAPTCHA_SECRET_KEY=your_secret_key_here
+```
+
+**프론트엔드 (.env)**:
+
+```env
+VITE_RECAPTCHA_SITE_KEY=your_site_key_here
+```
+
+### 3. 기능 활성화
+
+환경 변수에 키를 설정하면 자동으로 reCAPTCHA가 활성화됩니다:
+
+- 회원가입 페이지에서 봇 검증
+- 로그인 페이지에서 봇 검증
+- Footer에 Google 약관 표시
+
+### 4. 테스트 키 (개발용)
+
+개발 환경에서는 Google에서 제공하는 테스트 키를 사용할 수 있습니다:
+
+```env
+# 백엔드
+RECAPTCHA_SECRET_KEY=6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
+
+# 프론트엔드
+VITE_RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+```
+
+> ⚠️ **주의**: 테스트 키는 개발 환경에서만 사용하세요. 운영 환경에서는 실제 키를 발급받아 사용해야 합니다.
+
+## �🔧 개발 가이드
 
 ### 개발 서버 실행
 
