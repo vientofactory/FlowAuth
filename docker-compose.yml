@@ -14,7 +14,6 @@ services:
 
   redis:
     image: redis:8.0.1
-    container_name: hayang-redis
     restart: unless-stopped
     networks:
       - flowauth-network
