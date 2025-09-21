@@ -13,13 +13,13 @@ services:
       - flowauth-network
 
   redis:
-    image: redis:7.2.4-alpine
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:6389:6379"
-    command: redis-server --save "" --appendonly no
+    image: redis:8.0.1
+    container_name: hayang-redis
+    restart: always
     networks:
       - flowauth-network
+    ports:
+      - "127.0.0.1:6389:6379"
 
   backend:
     build:
