@@ -21,10 +21,6 @@ services:
       - redis_data:/data
     networks:
       - flowauth-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      timeout: 20s
-      retries: 10
 
   backend:
     build:
