@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# Docker Container Management Script
+# Usage: ./deploy.sh [service-name]
+# If no service name is provided, a full rolling update will be performed.
+
 SERVICE=$1
 
 if [ "$SERVICE" = "list" ]; then

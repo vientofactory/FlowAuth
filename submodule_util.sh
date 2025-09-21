@@ -3,10 +3,10 @@ set -e
 
 usage() {
   cat <<EOF
-사용법: $0 [sync|update|branch <branch-name>]
-  sync             : 서브모듈 원격 정보 동기화만 수행
-  update           : 서브모듈을 원격 최신 커밋으로 리셋 및 업데이트
-  branch <name>    : 모든 서브모듈을 지정한 브랜치로 체크아웃하고 최신 상태로 동기화
+Usage: $0 [sync|update|branch <branch-name>]
+  sync             : Only synchronize submodule remote info
+  update           : Reset and update submodules to the latest remote commit
+  branch <name>    : Checkout all submodules to the specified branch and sync to latest
 EOF
   exit 1
 }
@@ -17,18 +17,18 @@ fi
 
 case "$1" in
   sync)
-    echo "[1/1] 서브모듈 원격 정보 동기화..."
+    echo "[1/1] Synchronizing submodule remote info..."
     git submodule sync
-    echo "서브모듈 원격 정보 동기화 완료!"
+    echo "Submodule remote info synchronized!"
     ;;
   update)
-    echo "[1/1] 서브모듈 최신 커밋으로 리셋 및 업데이트..."
+    echo "[1/1] Resetting and updating submodules to latest commit..."
     git submodule update --init --recursive --remote
-    echo "서브모듈 최신 커밋 리셋 완료!"
+    echo "Submodules reset to latest commit!"
     ;;
   branch)
     if [ -z "$2" ]; then
-      echo "Error: 브랜치 이름을 입력하세요."
+      echo "Error: Please provide a branch name."
       usage
     fi
     BRANCH="$2"
@@ -43,14 +43,14 @@ case "$1" in
         fi
         git pull origin '"$BRANCH"'
       else
-        echo "  [!] origin/'"$BRANCH"' 브랜치가 없습니다. 건너뜁니다."
+        echo "  [!] origin/'"$BRANCH"' branch does not exist. Skipping."
       fi
     '
     echo "--- Staging submodule changes in superproject ---"
     for path in $(git config --file .gitmodules --get-regexp path | awk '{print $2}'); do
       git add "$path"
     done
-    echo "Done. now commit/push to the parent repository."
+    echo "Done. Now commit/push to the parent repository."
     ;;
   *)
     usage
