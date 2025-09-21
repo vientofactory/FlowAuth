@@ -20,7 +20,7 @@ FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을
 - **TypeScript 지원**: 타입 안전성과 개발 생산성 향상
 - **완전한 토큰 관리**: 액세스/리프레시 토큰 생성, 조회, 취소
 - **PKCE 지원**: Proof Key for Code Exchange 보안 강화
-- **환경 변수 기반 설정**: 유연한 배포 환경 지원
+- **Docker 지원**: 완전한 컨테이너화된 개발/배포 환경
 - **2단계 인증 (2FA)**: TOTP 기반 보안 강화
 - **reCAPTCHA v3 통합**: 봇 공격 방지를 위한 Google reCAPTCHA v3 지원
 - **사용자 유형 분리**: 일반 사용자와 개발자 역할 구분
@@ -33,7 +33,7 @@ FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을
 flowchart LR
    FE[Frontend<br/>SvelteKit]
    BE[Backend<br/>NestJS]
-   DB[Database<br/>MySQL]
+   DB[Database<br/>MariaDB]
 
    FE <--> BE
    BE <--> DB
@@ -82,11 +82,75 @@ flowchart LR
 ## 📋 시스템 요구사항
 
 - **Node.js**: v18 이상
-- **MySQL**: 8.0 이상 (또는 다른 지원 데이터베이스)
+- **MariaDB**: 최신 버전 (또는 MySQL 8.0 이상)
 - **npm** 또는 **yarn**
 - **Git**: 서브모듈 지원
 
-## 🛠️ 빠른 시작
+## � Docker를 이용한 빠른 시작
+
+Docker를 사용하면 모든 의존성과 함께 완전한 개발 환경을 쉽게 구축할 수 있습니다.
+
+### 1. 환경 설정
+
+```bash
+# 프로젝트 클론
+git clone --recursive https://github.com/vientofactory/FlowAuth.git
+cd FlowAuth
+
+# 환경 변수 설정
+cp .env.example .env
+# .env 파일을 열어서 데이터베이스 비밀번호 등을 설정하세요
+```
+
+### 2. Docker Compose로 실행
+
+```bash
+# 모든 서비스 시작 (백엔드, 프론트엔드, 데이터베이스, Redis)
+docker-compose up -d
+
+# 또는 개발 모드로 실행 (소스 코드 실시간 반영)
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+```
+
+#### 🚀 시작 순서
+
+Docker Compose는 다음과 같은 순서로 서비스를 시작합니다:
+
+1. **DB (MariaDB)** → 데이터베이스 초기화 및 준비
+2. **Redis** → 캐시 서버 준비
+3. **Backend (NestJS)** → DB와 Redis가 준비될 때까지 대기 후 시작
+4. **Frontend (SvelteKit)** → Backend가 준비될 때까지 대기 후 시작
+
+각 서비스는 healthcheck를 통해 이전 서비스가 완전히 준비되었는지 확인한 후 시작됩니다.
+
+### 3. 서비스 접속
+
+- **프론트엔드**: http://localhost:4173 (또는 개발 모드: http://localhost:5173)
+- **백엔드 API**: http://localhost:3000
+- **API 문서**: http://localhost:3000/api
+
+### 4. 로그 확인
+
+```bash
+# 모든 서비스 로그
+docker-compose logs -f
+
+# 특정 서비스 로그
+docker-compose logs -f backend
+docker-compose logs -f frontend
+```
+
+### 5. 서비스 중지
+
+```bash
+# 모든 서비스 중지 및 제거
+docker-compose down
+
+# 볼륨까지 제거 (데이터 초기화)
+docker-compose down -v
+```
+
+## 🛠️ 수동 설치 (Docker 미사용)
 
 1. **프로젝트 클론** (서브모듈 포함):
 
@@ -197,6 +261,38 @@ cd backend
 npm run migration:run
 ```
 
+### 데이터베이스 테이블 구조
+
+FlowAuth는 다음과 같은 5개의 주요 테이블을 사용합니다:
+
+#### 📋 테이블 개요
+
+| 테이블               | 설명                 | 주요 필드                                                          |
+| -------------------- | -------------------- | ------------------------------------------------------------------ |
+| `user`               | 사용자 정보          | id, username, email, password, permissions, 2FA 설정               |
+| `client`             | OAuth2 클라이언트    | id, clientId, clientSecret, redirectUris, grants, scopes           |
+| `token`              | 액세스/리프레시 토큰 | id, accessToken, refreshToken, expiresAt, scopes, user/client 관계 |
+| `authorization_code` | OAuth2 인가 코드     | id, code, expiresAt, scopes, user/client 관계                      |
+| `scope`              | 권한 범위            | id, name, description, isDefault, isActive                         |
+
+#### 🔗 테이블 관계
+
+```
+user (1) ──── (N) client
+  │                │
+  └─── (N) token ──┘
+       │
+       └─── (N) authorization_code
+```
+
+#### 📝 수동 테이블 생성 SQL
+
+TypeORM 마이그레이션을 사용하지 않고 수동으로 테이블을 생성하려면 [백엔드 README의 데이터베이스 설정 섹션](./backend/README.md#수동-테이블-생성-선택사항)을 참조하세요.
+
+## 🔧 개발 가이드
+
+````
+
 ## �️ reCAPTCHA 설정 (선택사항)
 
 FlowAuth는 Google reCAPTCHA v3를 지원하여 봇 공격으로부터 인증 시스템을 보호합니다.
@@ -217,7 +313,7 @@ FlowAuth는 Google reCAPTCHA v3를 지원하여 봇 공격으로부터 인증 �
 
 ```env
 RECAPTCHA_SECRET_KEY=your_secret_key_here
-```
+````
 
 **프론트엔드 (.env)**:
 
@@ -329,7 +425,7 @@ npm run lint          # 코드 린팅
 ### 📋 향후 계획
 
 - [ ] 통합 테스트 및 QA
-- [ ] Docker 컨테이너화
+- [x] Docker 컨테이너화 (완료)
 - [ ] CI/CD 파이프라인 구축
 - [ ] 프로덕션 배포 가이드
 - [ ] 성능 최적화
