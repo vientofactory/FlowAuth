@@ -4,9 +4,7 @@ services:
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
-      MARIADB_DATABASE: ${DB_NAME:-flowauth}
-      MARIADB_USER: ${DB_USERNAME:-flowauth_user}
-      MARIADB_PASSWORD: ${DB_PASSWORD:-flowauth_pass}
+      TZ: Asia/Seoul
     ports:
       - "3306:3306"
     volumes:
