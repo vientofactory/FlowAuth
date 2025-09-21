@@ -26,6 +26,8 @@ FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을
 - **사용자 유형 분리**: 일반 사용자와 개발자 역할 구분
 - **맞춤형 대시보드**: 사용자 유형별 최적화된 인터페이스
 - **역할 기반 접근 제어**: 세밀한 권한 관리 시스템
+- **Redis 캐싱**: 고성능 분산 캐싱으로 성능 최적화
+- **구조화된 로깅**: Winston 기반 보안 이벤트 및 감사 로그
 
 ## 🏗️ 아키텍처 개요
 
@@ -34,9 +36,11 @@ flowchart LR
    FE[Frontend<br/>SvelteKit]
    BE[Backend<br/>NestJS]
    DB[Database<br/>MariaDB]
+   REDIS[Cache<br/>Redis]
 
    FE <--> BE
    BE <--> DB
+   BE <--> REDIS
 
    subgraph "Frontend Layer"
       FE_UI[사용자 인터페이스]
@@ -53,6 +57,7 @@ flowchart LR
       BE_API[API 엔드포인트]
       BE_2FA[2FA 서비스]
       BE_RBAC[역할 기반 접근 제어]
+      BE_Cache[Redis 캐싱]
    end
 
    subgraph "Database Layer"
@@ -73,16 +78,38 @@ flowchart LR
    BE --> BE_Token
    BE --> BE_API
 
+   subgraph "Cache Layer"
+      CACHE_User[사용자 캐시]
+      CACHE_Scope[스코프 캐시]
+      CACHE_Stats[통계 캐시]
+   end
+
+   FE --> FE_UI
+   FE --> FE_Tester
+   FE --> FE_Dashboard
+   FE --> FE_Consent
+
+   BE --> BE_OAuth2
+   BE --> BE_JWT
+   BE --> BE_Token
+   BE --> BE_API
+   BE --> BE_Cache
+
    DB --> DB_User
    DB --> DB_Client
    DB --> DB_Token
    DB --> DB_Scope
+
+   REDIS --> CACHE_User
+   REDIS --> CACHE_Scope
+   REDIS --> CACHE_Stats
 ```
 
 ## 📋 시스템 요구사항
 
 - **Node.js**: v18 이상
 - **MariaDB**: 최신 버전 (또는 MySQL 8.0 이상)
+- **Redis**: 최신 버전 (권장: 7.x)
 - **npm** 또는 **yarn**
 - **Git**: 서브모듈 지원
 
@@ -117,8 +144,9 @@ docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
 Docker Compose는 다음과 같은 순서로 서비스를 시작합니다:
 
 1. **DB (MariaDB)** → 데이터베이스 초기화 및 준비
-2. **Backend (NestJS)** → DB가 준비될 때까지 대기 후 시작
-3. **Frontend (SvelteKit)** → Backend가 준비될 때까지 대기 후 시작
+2. **Redis** → 캐시 서버 초기화 및 준비
+3. **Backend (NestJS)** → DB와 Redis가 준비될 때까지 대기 후 시작
+4. **Frontend (SvelteKit)** → Backend가 준비될 때까지 대기 후 시작
 
 각 서비스는 healthcheck를 통해 이전 서비스가 완전히 준비되었는지 확인한 후 시작됩니다.
 
@@ -127,6 +155,7 @@ Docker Compose는 다음과 같은 순서로 서비스를 시작합니다:
 - **프론트엔드**: http://localhost:4173 (또는 개발 모드: http://localhost:5173)
 - **백엔드 API**: http://localhost:3000
 - **API 문서**: http://localhost:3000/api
+- **Redis**: localhost:6379 (Docker 컨테이너 내부에서만 접근 가능)
 
 ### 4. 로그 확인
 
@@ -137,6 +166,7 @@ docker-compose logs -f
 # 특정 서비스 로그
 docker-compose logs -f backend
 docker-compose logs -f frontend
+docker-compose logs -f redis
 ```
 
 ### 5. 서비스 중지
@@ -158,7 +188,23 @@ docker-compose down -v
    cd FlowAuth
    ```
 
-2. **백엔드 실행**:
+2. **Redis 설치 및 실행**:
+
+   ```bash
+   # macOS (Homebrew)
+   brew install redis
+   brew services start redis
+
+   # Ubuntu/Debian
+   sudo apt update
+   sudo apt install redis-server
+   sudo systemctl start redis-server
+
+   # 또는 Docker로 실행
+   docker run -d -p 6379:6379 --name redis redis:7-alpine
+   ```
+
+3. **백엔드 실행**:
 
    ```bash
    cd backend
@@ -167,7 +213,7 @@ docker-compose down -v
    npm run start:dev
    ```
 
-3. **프론트엔드 실행** (새 터미널에서):
+4. **프론트엔드 실행** (새 터미널에서):
 
    ```bash
    cd frontend
@@ -175,7 +221,7 @@ docker-compose down -v
    npm run dev
    ```
 
-4. **브라우저에서 접속**:
+5. **브라우저에서 접속**:
    - 프론트엔드: http://localhost:5173
    - 백엔드 API: http://localhost:3000
    - API 문서: http://localhost:3000/api
@@ -188,6 +234,7 @@ FlowAuth/
 │   ├── src/
 │   │   ├── auth/         # JWT 인증 모듈
 │   │   ├── oauth2/       # OAuth2 핵심 구현
+│   │   ├── cache/        # Redis 캐시 설정
 │   │   ├── user/         # 사용자 엔티티 및 서비스
 │   │   ├── client/       # OAuth2 클라이언트 엔티티
 │   │   ├── token/        # 토큰 엔티티 및 관리
@@ -237,6 +284,11 @@ JWT_EXPIRES_IN=1h
 
 # 보안 설정
 BCRYPT_SALT_ROUNDS=10
+
+# Redis 캐시 설정
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
 
 # reCAPTCHA 설정 (선택사항)
 RECAPTCHA_SECRET_KEY=your_recaptcha_secret_key_here
@@ -473,6 +525,49 @@ FlowAuth는 모든 개발자의 기여를 환영합니다! 아래 절차에 따�
 - **이슈**: [GitHub Issues](https://github.com/vientofactory/FlowAuth/issues)
 - **토론**: [GitHub Discussions](https://github.com/vientofactory/FlowAuth/discussions)
 
-## 📄 라이선스
+## Redis 캐싱 시스템
+
+FlowAuth는 고성능을 위해 Redis 기반 분산 캐싱을 구현합니다.
+
+### 캐시되는 데이터
+
+- **사용자 정보**: 프로필, 권한 정보 (TTL: 10분)
+- **사용자 권한**: 역할 및 권한 데이터 (TTL: 5분)
+- **대시보드 통계**: 사용자 활동 및 통계 데이터 (TTL: 2분)
+- **OAuth2 스코프**: 권한 범위 정보 (TTL: 1시간)
+
+### 캐시 키 구조
+
+```
+permissions:{userId}     # 사용자 권한
+user:{userId}           # 사용자 정보
+stats:{userId}          # 대시보드 통계
+activities:{userId}:{limit}  # 사용자 활동
+scopes:all              # 전체 스코프 목록
+scopes:default          # 기본 스코프 목록
+scopes:name:{scopeName} # 개별 스코프
+```
+
+### 캐시 관리
+
+- **자동 갱신**: 데이터 변경 시 자동으로 캐시 무효화 및 재생성
+- **메모리 + Redis**: 이중 캐싱으로 빠른 응답 속도 보장
+- **TTL 설정**: 각 데이터 유형별 최적화된 만료 시간
+- **에러 복원력**: 캐시 실패 시 데이터베이스에서 직접 조회
+
+### 모니터링
+
+```bash
+# Redis 연결 상태 확인
+docker-compose exec redis redis-cli ping
+
+# 캐시 키 조회
+docker-compose exec redis redis-cli keys "*"
+
+# 메모리 사용량 확인
+docker-compose exec redis redis-cli info memory
+```
+
+## 라이선스
 
 이 프로젝트는 MIT 라이선스 하에 있습니다.

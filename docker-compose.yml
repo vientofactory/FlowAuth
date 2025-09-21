@@ -1,6 +1,6 @@
 services:
   mariadb:
-    image: mariadb:latest
+    image: mariadb:11.3.2
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
@@ -12,6 +12,16 @@ services:
     networks:
       - flowauth-network
 
+  redis:
+    image: redis:7.2.4-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6389:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - flowauth-network
+
   backend:
     build:
       context: ./backend
@@ -19,10 +29,13 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     ports:
       - "127.0.0.1:6000:3000"
     depends_on:
       - mariadb
+      - redis
     networks:
       - flowauth-network
     volumes:
@@ -45,6 +58,8 @@ services:
 
 volumes:
   db_data:
+    driver: local
+  redis_data:
     driver: local
   uploads_data:
     driver: local
