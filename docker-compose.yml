@@ -36,10 +36,8 @@ services:
     ports:
       - "127.0.0.1:6000:3000"
     depends_on:
-      mariadb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - mariadb
+      - redis
     networks:
       - flowauth-network
     volumes:
