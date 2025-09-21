@@ -86,7 +86,7 @@ flowchart LR
 - **npm** 또는 **yarn**
 - **Git**: 서브모듈 지원
 
-## � Docker를 이용한 빠른 시작
+## Docker를 이용한 빠른 시작
 
 Docker를 사용하면 모든 의존성과 함께 완전한 개발 환경을 쉽게 구축할 수 있습니다.
 
@@ -291,9 +291,7 @@ TypeORM 마이그레이션을 사용하지 않고 수동으로 테이블을 생�
 
 ## 🔧 개발 가이드
 
-````
-
-## �️ reCAPTCHA 설정 (선택사항)
+## reCAPTCHA 설정 (선택사항)
 
 FlowAuth는 Google reCAPTCHA v3를 지원하여 봇 공격으로부터 인증 시스템을 보호합니다.
 
@@ -313,7 +311,7 @@ FlowAuth는 Google reCAPTCHA v3를 지원하여 봇 공격으로부터 인증 �
 
 ```env
 RECAPTCHA_SECRET_KEY=your_secret_key_here
-````
+```
 
 **프론트엔드 (.env)**:
 
@@ -343,7 +341,7 @@ VITE_RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
 
 > ⚠️ **주의**: 테스트 키는 개발 환경에서만 사용하세요. 운영 환경에서는 실제 키를 발급받아 사용해야 합니다.
 
-## �🔧 개발 가이드
+## 🔧 개발 가이드
 
 ### 개발 서버 실행
 
