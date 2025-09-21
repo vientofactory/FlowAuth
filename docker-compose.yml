@@ -11,10 +11,6 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - flowauth-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
 
   redis:
     image: redis:latest
@@ -48,12 +44,6 @@ services:
       - flowauth-network
     volumes:
       - uploads_data:/app/uploads
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/", "||", "exit", "1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
 
   frontend:
     build:
@@ -69,11 +59,6 @@ services:
       - backend
     networks:
       - flowauth-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4173"]
-      timeout: 20s
-      retries: 10
-      start_period: 40s
 
 volumes:
   db_data:
