@@ -1,7 +1,6 @@
 services:
-  db:
+  mariadb:
     image: mariadb:latest
-    container_name: flowauth-db
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
@@ -12,7 +11,6 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
-      - ./backend/migrations:/docker-entrypoint-initdb.d
     networks:
       - flowauth-network
     healthcheck:
@@ -22,7 +20,6 @@ services:
 
   redis:
     image: redis:latest
-    container_name: flowauth-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -39,7 +36,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: flowauth-backend
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -53,9 +49,9 @@ services:
     networks:
       - flowauth-network
     volumes:
-      - ./backend/uploads:/app/uploads
+      - uploads_data:/app/uploads
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health", "||", "exit", "1"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/", "||", "exit", "1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -68,10 +64,9 @@ services:
     container_name: flowauth-frontend
     restart: unless-stopped
     environment:
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:3000}
-      VITE_RECAPTCHA_SITE_KEY: ${VITE_RECAPTCHA_SITE_KEY:-}
+      NODE_ENV: production
     ports:
-      - "4173:4173"
+      - "4000:3000"
     depends_on:
       - backend
     networks:
@@ -86,6 +81,8 @@ volumes:
   db_data:
     driver: local
   redis_data:
+    driver: local
+  uploads_data:
     driver: local
 
 networks:
