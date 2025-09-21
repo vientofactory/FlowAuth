@@ -105,7 +105,7 @@ cp .env.example .env
 ### 2. Docker Compose로 실행
 
 ```bash
-# 모든 서비스 시작 (백엔드, 프론트엔드, 데이터베이스, Redis)
+# 모든 서비스 시작 (백엔드, 프론트엔드, 데이터베이스)
 docker-compose up -d
 
 # 또는 개발 모드로 실행 (소스 코드 실시간 반영)
@@ -117,9 +117,8 @@ docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
 Docker Compose는 다음과 같은 순서로 서비스를 시작합니다:
 
 1. **DB (MariaDB)** → 데이터베이스 초기화 및 준비
-2. **Redis** → 캐시 서버 준비
-3. **Backend (NestJS)** → DB와 Redis가 준비될 때까지 대기 후 시작
-4. **Frontend (SvelteKit)** → Backend가 준비될 때까지 대기 후 시작
+2. **Backend (NestJS)** → DB가 준비될 때까지 대기 후 시작
+3. **Frontend (SvelteKit)** → Backend가 준비될 때까지 대기 후 시작
 
 각 서비스는 healthcheck를 통해 이전 서비스가 완전히 준비되었는지 확인한 후 시작됩니다.
 
