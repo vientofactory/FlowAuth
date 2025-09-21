@@ -23,7 +23,6 @@ services:
       - "127.0.0.1:6000:3000"
     depends_on:
       - mariadb
-      - redis
     networks:
       - flowauth-network
     volumes:
@@ -46,8 +45,6 @@ services:
 
 volumes:
   db_data:
-    driver: local
-  redis_data:
     driver: local
   uploads_data:
     driver: local
