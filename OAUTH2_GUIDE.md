@@ -98,6 +98,7 @@ Authorization: Basic <base64(client_id:client_secret)>
 
 ```
 grant_type=authorization_code
+client_id=your-client-id
 code=authorization_code_from_redirect
 redirect_uri=https://your-app.com/callback
 code_verifier=pkce_code_verifier (PKCE를 사용한 경우)
@@ -172,6 +173,7 @@ Authorization: Basic <base64(client_id:client_secret)>
 
 ```
 grant_type=refresh_token
+client_id=your-client-id
 refresh_token=your_refresh_token
 scope=read:user email (선택사항, 기존 스코프 유지 시 생략)
 ```
@@ -319,6 +321,7 @@ class OAuth2Client {
   async exchangeCode(code, codeVerifier = null) {
     const params = new URLSearchParams({
       grant_type: "authorization_code",
+      client_id: this.clientId,
       code: code,
       redirect_uri: this.redirectUri,
     });
@@ -352,6 +355,7 @@ class OAuth2Client {
   async refreshToken(refreshToken) {
     const params = new URLSearchParams({
       grant_type: "refresh_token",
+      client_id: this.clientId,
       refresh_token: refreshToken,
     });
 
