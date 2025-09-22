@@ -362,6 +362,7 @@ FlowAuth는 Google reCAPTCHA v3를 지원하여 봇 공격으로부터 인증 �
 
 ```env
 RECAPTCHA_SECRET_KEY=your_secret_key_here
+RECAPTCHA_SCORE_THRESHOLD=0.5  # reCAPTCHA v3 점수 임계값 (0.0-1.0, 기본값: 0.5)
 ```
 
 **프론트엔드 (.env)**:
@@ -385,6 +386,7 @@ VITE_RECAPTCHA_SITE_KEY=your_site_key_here
 ```env
 # 백엔드
 RECAPTCHA_SECRET_KEY=6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
+RECAPTCHA_SCORE_THRESHOLD=0.5
 
 # 프론트엔드
 VITE_RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
@@ -558,6 +560,10 @@ JWT_REFRESH_SECRET=your-jwt-refresh-secret
 # OAuth2
 OAUTH2_ISSUER=https://your-domain.com
 FRONTEND_URL=https://your-frontend-domain.com
+
+# reCAPTCHA (선택사항)
+RECAPTCHA_SECRET_KEY=your-recaptcha-secret-key
+RECAPTCHA_SCORE_THRESHOLD=0.5
 
 # 기타
 NODE_ENV=production
