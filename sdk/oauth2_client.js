@@ -46,6 +46,7 @@ class OAuth2Client {
   async exchangeCode(code, codeVerifier = null) {
     const params = new URLSearchParams({
       grant_type: "authorization_code",
+      client_id: this.clientId,
       code: code,
       redirect_uri: this.redirectUri,
     });
@@ -89,6 +90,7 @@ class OAuth2Client {
   async refreshToken(refreshToken) {
     const params = new URLSearchParams({
       grant_type: "refresh_token",
+      client_id: this.clientId,
       refresh_token: refreshToken,
     });
 
