@@ -474,13 +474,97 @@ npm run lint          # 코드 린팅
 ### 📋 향후 계획
 
 - [ ] 통합 테스트 및 QA
-- [x] Docker 컨테이너화 (완료)
+- [x] Docker 컨테이너화
 - [ ] CI/CD 파이프라인 구축
-- [ ] 프로덕션 배포 가이드
+- [x] 프로덕션 배포 가이드
 - [ ] 성능 최적화
 - [ ] 모니터링 및 로깅 시스템
 
-## 📚 API 문서
+## 배포 가이드
+
+FlowAuth는 Docker를 통한 컨테이너화된 배포를 권장합니다.
+
+### Docker를 이용한 프로덕션 배포
+
+```bash
+# 프로덕션용 Docker Compose 실행
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# 또는 환경 변수로 프로덕션 모드 지정
+NODE_ENV=production docker-compose up -d
+```
+
+### 수동 배포
+
+#### 백엔드 배포
+
+```bash
+cd backend
+npm ci --only=production
+npm run build
+npm run start:prod
+```
+
+#### 프론트엔드 배포
+
+```bash
+cd frontend
+npm ci --only=production
+npm run build
+node build/index.js
+```
+
+### 지원되는 플랫폼
+
+#### 백엔드
+
+- **Railway**: Node.js 애플리케이션으로 배포
+- **Render**: Node.js 웹 서비스로 배포
+- **Heroku**: Node.js 앱으로 배포
+- **DigitalOcean App Platform**: Node.js 앱으로 배포
+- **AWS EC2**: 직접 서버 배포
+- **PM2**: 프로세스 매니저를 통한 배포
+
+#### 프론트엔드
+
+- **Vercel**: `vercel --prod`
+- **Railway**: Node.js 애플리케이션으로 배포
+- **Render**: Node.js 웹 서비스로 배포
+- **Heroku**: Node.js 앱으로 배포
+- **DigitalOcean App Platform**: Node.js 앱으로 배포
+- **PM2**: 프로세스 매니저를 통한 배포
+
+### 환경 변수 설정
+
+프로덕션 배포 시 다음 환경 변수를 설정하세요:
+
+```bash
+# 데이터베이스
+DB_HOST=your-db-host
+DB_PORT=3306
+DB_USERNAME=your-db-user
+DB_PASSWORD=your-db-password
+DB_NAME=flowauth
+
+# Redis
+REDIS_HOST=your-redis-host
+REDIS_PORT=6379
+REDIS_PASSWORD=your-redis-password
+
+# JWT
+JWT_SECRET=your-jwt-secret
+JWT_REFRESH_SECRET=your-jwt-refresh-secret
+
+# OAuth2
+OAUTH2_ISSUER=https://your-domain.com
+FRONTEND_URL=https://your-frontend-domain.com
+
+# 기타
+NODE_ENV=production
+PORT=3000
+```
+
+## �📚 API 문서
 
 백엔드 서버 실행 후 다음에서 API 문서를 확인할 수 있습니다:
 
