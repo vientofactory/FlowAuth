@@ -6,3 +6,6 @@
 	path = frontend
 	url = https://github.com/vientofactory/FlowAuth-Frontend.git
 	branch = dev
+[submodule "sdk"]
+	path = sdk
+	url = https://github.com/vientofactory/FlowAuth-SDK.git
