@@ -58,14 +58,14 @@ GET {BACKEND_HOST}/oauth2/authorize?response_type=code&client_id=your-client-id&
 **응답:**
 
 - 사용자가 로그인하지 않은 경우: 로그인 페이지로 리다이렉트
-- 사용자가 로그인한 경우: 동의 페이지로 리다이렉트 (`{FRONTEND_HOST}/oauth2/consent`)
+- 사용자가 로그인한 경우: 동의 페이지로 리다이렉트 (`{FRONTEND_HOST}/oauth2/authorize`)
 - 사용자가 동의한 경우: `redirect_uri`로 authorization code와 함께 리다이렉트
 
 ### 2. 동의 페이지 (Consent Page)
 
 사용자가 클라이언트 애플리케이션의 권한 요청에 동의하는 페이지입니다.
 
-**URL:** `{FRONTEND_HOST}/oauth2/consent`
+**URL:** `{FRONTEND_HOST}/oauth2/authorize`
 
 **동의 처리:** `POST {BACKEND_HOST}/oauth2/authorize/consent`
 
