@@ -1,30 +1,15 @@
 # OAuth2 인증 시스템 가이드
 
-## 환경 설정
+이 문서는 FlowAuth의 OAuth2 인증 과정에 대해 설명합니다.
 
-프로덕션 환경에서 실제 도메인을 사용하기 위해 다음 환경변수를 설정하세요:
+`{BACKEND_HOST}`, `{FRONTEND_HOST}`는 실제 서비스의 도메인 주소로 변경해야 합니다.
 
-**백엔드 (.env 파일):**
+예시:
 
-```bash
-# API가 실행되는 호스트
-API_BASE_URL=https://api.yourdomain.com
-```
-
-**프론트엔드 (.env 파일):**
-
-```bash
-# 백엔드 API 호스트
-VITE_API_BASE_URL=https://api.yourdomain.com
-
-# 애플리케이션 이름
-VITE_APP_NAME=YourApp
-
-# reCAPTCHA 사이트 키 (선택사항)
-VITE_RECAPTCHA_SITE_KEY=your-recaptcha-site-key
-```
-
-문서에서 `{BACKEND_HOST}`는 `VITE_API_BASE_URL` 환경변수로, `{FRONTEND_HOST}`는 프론트엔드 애플리케이션이 호스팅되는 도메인으로 대체됩니다.
+- 공식 데모 서비스의 경우
+  - `{BACKEND_HOST}`: https://flowauth-api.viento.me
+  - `{FRONTEND_HOST}`: https://auth.viento.me
+- 실제 운영 환경에서는 각자의 서비스 도메인으로 대체하세요.
 
 ## Authorization Code Grant 플로우
 
