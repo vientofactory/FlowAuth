@@ -194,6 +194,7 @@ FlowAuth에서 지원하는 OAuth2 스코프입니다:
 ### 사용자 정보 관련
 
 - `read:user` - 사용자 기본 정보 읽기
+- `email` - 사용자 이메일 주소 읽기
 
 ### 프로필 관련
 
@@ -208,13 +209,12 @@ FlowAuth에서 지원하는 OAuth2 스코프입니다:
 ### 클라이언트 관리
 
 - `read:client` - 클라이언트 정보 읽기
-- `write:client` - 클라이언트 정보 쓰기
+- `write:client` - 클라이언트 정보 수정
 - `delete:client` - 클라이언트 삭제
 
-### 관리자
+### 기본 권한
 
-- `admin` - 관리자 권한
-- `basic` - 기본 권한
+- `basic` - 기본 접근 권한
 
 ## 보안 기능
 
