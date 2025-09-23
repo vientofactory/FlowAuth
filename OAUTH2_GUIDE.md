@@ -26,11 +26,11 @@ FlowAuth는 OAuth 2.0 Authorization Code Grant 플로우를 완전히 지원합�
 - `response_type=code` - 응답 타입
 - `client_id` - 클라이언트 식별자
 - `redirect_uri` - 인증 완료 후 리다이렉트될 URI
+- `state` - CSRF 방지를 위한 상태값 (보안상 필수)
 
 **선택 파라미터:**
 
 - `scope` - 요청할 권한 스코프 (공백으로 구분)
-- `state` - CSRF 방지를 위한 상태값
 - `code_challenge` - PKCE 코드 챌린지
 - `code_challenge_method` - PKCE 코드 챌린지 메서드 (S256 권장)
 
@@ -58,11 +58,12 @@ GET {BACKEND_HOST}/oauth2/authorize?response_type=code&client_id=your-client-id&
 
 ```json
 {
+  "approved": true,
   "client_id": "your-client-id",
   "redirect_uri": "https://your-app.com/callback",
+  "response_type": "code",
   "scope": "read:user read:profile",
-  "state": "random-state",
-  "approved": true
+  "state": "random-state"
 }
 ```
 
@@ -83,9 +84,9 @@ Authorization: Basic <base64(client_id:client_secret)>
 
 ```
 grant_type=authorization_code
-client_id=your-client-id
+client_id=your-client-id (선택사항, 헤더에 포함된 경우 생략 가능)
 code=authorization_code_from_redirect
-redirect_uri=https://your-app.com/callback
+redirect_uri=https://your-app.com/callback (선택사항)
 code_verifier=pkce_code_verifier (PKCE를 사용한 경우)
 ```
 
@@ -124,17 +125,18 @@ Authorization: Bearer <access_token>
 
 **스코프별 반환 정보:**
 
-- **read:user 스코프:** 사용자 기본 정보 (ID, 사용자명, 권한)
-- **read:profile 스코프:** 사용자 프로필 정보
+- **항상 포함:** `sub` (사용자 식별자)
+- **`email` 스코프:** `email` (사용자 이메일 주소)
+- **`read:profile` 스코프:** `username`, `roles` (사용자명, 역할 정보)
 
 **예시 응답:**
 
 ```json
 {
   "sub": "123",
+  "email": "user@example.com",
   "username": "johndoe",
-  "roles": ["user"],
-  "permissions": ["read:user"]
+  "roles": ["user"]
 }
 ```
 
