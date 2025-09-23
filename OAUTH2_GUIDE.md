@@ -266,6 +266,7 @@ OAuth2 클라이언트를 등록하려면:
 - `access_denied` - 사용자가 권한 부여를 거부
 - `unsupported_response_type` - 지원하지 않는 응답 타입
 - `invalid_scope` - 잘못된 스코프
+- `invalid_grant` - 잘못된 권한 부여
 - `server_error` - 서버 내부 오류
 - `temporarily_unavailable` - 일시적으로 사용할 수 없음
 
