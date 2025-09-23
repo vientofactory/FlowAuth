@@ -52,7 +52,7 @@ FlowAuth는 OAuth 2.0 Authorization Code Grant 플로우를 완전히 지원합�
 **예시 요청:**
 
 ```
-GET {BACKEND_HOST}/oauth2/authorize?response_type=code&client_id=your-client-id&redirect_uri=https://your-app.com/callback&scope=read:user%20email&state=random-state
+GET {BACKEND_HOST}/oauth2/authorize?response_type=code&client_id=your-client-id&redirect_uri=https://your-app.com/callback&scope=read:user%20read:profile&state=random-state
 ```
 
 **응답:**
@@ -75,7 +75,7 @@ GET {BACKEND_HOST}/oauth2/authorize?response_type=code&client_id=your-client-id&
 {
   "client_id": "your-client-id",
   "redirect_uri": "https://your-app.com/callback",
-  "scope": "read:user email",
+  "scope": "read:user read:profile",
   "state": "random-state",
   "approved": true
 }
@@ -112,7 +112,7 @@ code_verifier=pkce_code_verifier (PKCE를 사용한 경우)
   "token_type": "Bearer",
   "expires_in": 3600,
   "refresh_token": "refresh_token_string",
-  "scope": "read:user email"
+  "scope": "read:user read:profile"
 }
 ```
 
@@ -139,18 +139,15 @@ Authorization: Bearer <access_token>
 
 **스코프별 반환 정보:**
 
-- **기본 스코프 (openid):** 사용자 식별자
-- **email 스코프:** 이메일 주소
-- **profile 스코프:** 사용자명, 역할 정보
+- **read:user 스코프:** 사용자 기본 정보 (ID, 사용자명, 권한)
+- **read:profile 스코프:** 사용자 프로필 정보
 
 **예시 응답:**
 
 ```json
 {
   "sub": "123",
-  "email": "user@example.com",
   "username": "johndoe",
-  "email_verified": true,
   "roles": ["user"],
   "permissions": ["read:user"]
 }
@@ -175,7 +172,7 @@ Authorization: Basic <base64(client_id:client_secret)>
 grant_type=refresh_token
 client_id=your-client-id
 refresh_token=your_refresh_token
-scope=read:user email (선택사항, 기존 스코프 유지 시 생략)
+scope=read:user read:profile (선택사항, 기존 스코프 유지 시 생략)
 ```
 
 **성공 응답 (200):**
@@ -186,7 +183,7 @@ scope=read:user email (선택사항, 기존 스코프 유지 시 생략)
   "token_type": "Bearer",
   "expires_in": 3600,
   "refresh_token": "new_refresh_token",
-  "scope": "read:user email"
+  "scope": "read:user read:profile"
 }
 ```
 
@@ -197,13 +194,10 @@ FlowAuth에서 지원하는 OAuth2 스코프입니다:
 ### 사용자 정보 관련
 
 - `read:user` - 사용자 기본 정보 읽기
-- `write:user` - 사용자 정보 수정
-- `delete:user` - 사용자 삭제
 
 ### 프로필 관련
 
 - `read:profile` - 사용자 프로필 읽기
-- `write:profile` - 사용자 프로필 수정
 
 ### 파일 관리
 
@@ -216,12 +210,6 @@ FlowAuth에서 지원하는 OAuth2 스코프입니다:
 - `read:client` - 클라이언트 정보 읽기
 - `write:client` - 클라이언트 정보 쓰기
 - `delete:client` - 클라이언트 삭제
-
-### OpenID Connect 표준
-
-- `openid` - OpenID Connect 기본 스코프
-- `profile` - 사용자 프로필 정보
-- `email` - 이메일 주소
 
 ### 관리자
 
