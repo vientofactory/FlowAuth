@@ -7,7 +7,7 @@
 예시:
 
 - 공식 데모 서비스의 경우
-  - `{BACKEND_HOST}`: https://flowauth-api.viento.me
+  - `{BACKEND_HOST}`: https://authserver.viento.me
   - `{FRONTEND_HOST}`: https://auth.viento.me
 - 실제 운영 환경에서는 각자의 서비스 도메인으로 대체하세요.
 
