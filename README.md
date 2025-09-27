@@ -7,7 +7,7 @@
 
 FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을 준수하는 모던한 인증 및 권한 부여 시스템입니다. 외부 서비스 제공자들이 쉽게 애플리케이션을 등록하고 관리할 수 있는 플랫폼을 제공합니다.
 
-## 🚀 특징
+## 특징
 
 - **완전한 OAuth2 구현**: Authorization Code Grant 플로우 완전 지원
 - **표준 준수**: OAuth2 RFC 6749 표준 완전 준수
@@ -29,7 +29,7 @@ FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을
 - **Redis 캐싱**: 고성능 분산 캐싱으로 성능 최적화
 - **구조화된 로깅**: Winston 기반 보안 이벤트 및 감사 로그
 
-## 🏗️ 아키텍처 개요
+## 아키텍처 개요
 
 ```mermaid
 flowchart LR
@@ -105,7 +105,7 @@ flowchart LR
    REDIS --> CACHE_Stats
 ```
 
-## 📋 시스템 요구사항
+## 시스템 요구사항
 
 - **Node.js**: v18 이상
 - **MariaDB**: 최신 버전 (또는 MySQL 8.0 이상)
@@ -139,7 +139,7 @@ docker-compose up -d
 docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
 ```
 
-#### 🚀 시작 순서
+#### 시작 순서
 
 Docker Compose는 다음과 같은 순서로 서비스를 시작합니다:
 
@@ -179,7 +179,7 @@ docker-compose down
 docker-compose down -v
 ```
 
-## 🛠️ 수동 설치 (Docker 미사용)
+## 수동 설치 (Docker 미사용)
 
 1. **프로젝트 클론** (서브모듈 포함):
 
@@ -226,7 +226,7 @@ docker-compose down -v
    - 백엔드 API: http://localhost:3000
    - API 문서: http://localhost:3000/api
 
-## 📁 프로젝트 구조
+## 프로젝트 구조
 
 ```
 FlowAuth/
@@ -262,7 +262,7 @@ FlowAuth/
 └── README.md
 ```
 
-## ⚙️ 환경 설정
+## 환경 설정
 
 ### 백엔드 (.env 파일)
 
@@ -316,7 +316,7 @@ npm run migration:run
 
 FlowAuth는 다음과 같은 5개의 주요 테이블을 사용합니다:
 
-#### 📋 테이블 개요
+#### 테이블 개요
 
 | 테이블               | 설명                 | 주요 필드                                                          |
 | -------------------- | -------------------- | ------------------------------------------------------------------ |
@@ -326,7 +326,7 @@ FlowAuth는 다음과 같은 5개의 주요 테이블을 사용합니다:
 | `authorization_code` | OAuth2 인가 코드     | id, code, expiresAt, scopes, user/client 관계                      |
 | `scope`              | 권한 범위            | id, name, description, isDefault, isActive                         |
 
-#### 🔗 테이블 관계
+#### 테이블 관계
 
 ```
 user (1) ──── (N) client
@@ -336,11 +336,9 @@ user (1) ──── (N) client
        └─── (N) authorization_code
 ```
 
-#### 📝 수동 테이블 생성 SQL
+#### 수동 테이블 생성 SQL
 
 TypeORM 마이그레이션을 사용하지 않고 수동으로 테이블을 생성하려면 [백엔드 README의 데이터베이스 설정 섹션](./backend/README.md#수동-테이블-생성-선택사항)을 참조하세요.
-
-## 🔧 개발 가이드
 
 ## reCAPTCHA 설정 (선택사항)
 
@@ -392,9 +390,9 @@ RECAPTCHA_SCORE_THRESHOLD=0.5
 VITE_RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
 ```
 
-> ⚠️ **주의**: 테스트 키는 개발 환경에서만 사용하세요. 운영 환경에서는 실제 키를 발급받아 사용해야 합니다.
+> **주의**: 테스트 키는 개발 환경에서만 사용하세요. 운영 환경에서는 실제 키를 발급받아 사용해야 합니다.
 
-## 🔧 개발 가이드
+## 개발 환경 설정
 
 ### 개발 서버 실행
 
@@ -428,9 +426,9 @@ npm run lint          # 코드 린팅
 
 ## 프로젝트 상태
 
-### ✅ 완료된 기능들
+### 완료된 기능들
 
-#### 🎨 프론트엔드
+#### 프론트엔드
 
 - **현대적인 메인 페이지**: 그라데이션 배경과 애니메이션 효과
 - **인증 시스템**: 회원가입, 로그인, 프로필 관리 페이지
@@ -450,7 +448,7 @@ npm run lint          # 코드 린팅
 - **동적 대시보드**: 사용자 유형에 따른 통계 및 메뉴 표시
 - **역할 기반 네비게이션**: 권한에 따른 메뉴 필터링
 
-#### 🔧 백엔드
+#### 백엔드
 
 - **완전한 OAuth2 구현**: Authorization Code Grant 플로우
 - **사용자 관리**: 등록, 로그인, 프로필 관리 API
@@ -468,12 +466,12 @@ npm run lint          # 코드 린팅
 - **역할 기반 액세스 제어 (RBAC)**: 세부적인 권한 관리
 - **대시보드 API**: 사용자 유형별 통계 및 데이터 제공
 
-### 🔄 진행 중인 작업
+### 진행 중인 작업
 
 - [ ] 관리자 페이지 개발
 - [ ] 사용자 설정 페이지 완성
 
-### 📋 향후 계획
+### 향후 계획
 
 - [ ] 통합 테스트 및 QA
 - [x] Docker 컨테이너화
@@ -570,13 +568,13 @@ NODE_ENV=production
 PORT=3000
 ```
 
-## �📚 API 문서
+## API 문서
 
 백엔드 서버 실행 후 다음에서 API 문서를 확인할 수 있습니다:
 
 - **Swagger UI**: http://localhost:3000/api
 
-## 🔒 보안 기능
+## 보안 기능
 
 - **JWT 토큰 기반 인증**
 - **비밀번호 해싱 (bcrypt)**
@@ -589,12 +587,12 @@ PORT=3000
 - **2단계 인증 (2FA)**: TOTP 기반 추가 보안 계층
 - **역할 기반 액세스 제어 (RBAC)**: 세부적인 권한 관리
 
-## 🤝 기여 가이드
+## 기여 가이드
 
 FlowAuth는 모든 개발자의 기여를 환영합니다! 아래 절차에 따라 자유롭게 참여해 주세요.
 
 1. **Fork**: 백엔드 또는 프론트엔드 리포지토리를 자신의 GitHub 계정으로 포크하세요.
-   > ⚠️ 이 메인 리포지토리는 서브모듈 관리용입니다. 실제 코드 변경은 각 하위 리포지토리에서 진행해 주세요.
+   > **주의**: 이 메인 리포지토리는 서브모듈 관리용입니다. 실제 코드 변경은 각 하위 리포지토리에서 진행해 주세요.
 2. **브랜치 생성**: 새로운 기능 또는 버그 수정을 위한 브랜치를 만드세요.
    ```bash
    git checkout -b feature/YourFeatureName
@@ -610,7 +608,7 @@ FlowAuth는 모든 개발자의 기여를 환영합니다! 아래 절차에 따�
 5. **Pull Request 생성**: GitHub에서 Pull Request를 생성하고, 변경 내용을 설명해 주세요.
 6. **리뷰 및 반영**: 리뷰어의 피드백을 반영해 주세요.
 
-## 📞 문의 및 지원
+## 문의 및 지원
 
 - **이슈**: [GitHub Issues](https://github.com/vientofactory/FlowAuth/issues)
 - **토론**: [GitHub Discussions](https://github.com/vientofactory/FlowAuth/discussions)
