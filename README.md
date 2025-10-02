@@ -26,6 +26,7 @@ FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을
 - **사용자 유형 분리**: 일반 사용자와 개발자 역할 구분
 - **맞춤형 대시보드**: 사용자 유형별 최적화된 인터페이스
 - **역할 기반 접근 제어**: 세밀한 권한 관리 시스템
+- **OAuth2 클라이언트 SDK**: 외부 개발자들이 쉽게 통합할 수 있는 SDK 제공
 - **공유 모듈 아키텍처**: 프론트엔드와 백엔드 간 중앙화된 권한 및 유틸리티 공유
 - **Redis 캐싱**: 고성능 분산 캐싱으로 성능 최적화
 - **구조화된 로깅**: Winston 기반 보안 이벤트 및 감사 로그
@@ -155,10 +156,11 @@ Docker Compose는 다음과 같은 순서로 서비스를 시작합니다:
 
 ### 3. 서비스 접속
 
-- **프론트엔드**: http://localhost:4173 (또는 개발 모드: http://localhost:5173)
-- **백엔드 API**: http://localhost:3000
-- **API 문서**: http://localhost:3000/api
-- **Redis**: localhost:6379 (Docker 컨테이너 내부에서만 접근 가능)
+- **프론트엔드**: http://localhost:7000
+- **백엔드 API**: http://localhost:6000
+- **API 문서**: http://localhost:6000/api
+- **MariaDB**: localhost:3307 (Docker 컨테이너 내부에서만 접근 가능)
+- **Redis**: localhost:6389 (Docker 컨테이너 내부에서만 접근 가능)
 
 ### 4. 로그 확인
 
@@ -235,25 +237,33 @@ docker-compose down -v
 FlowAuth/
 ├── backend/              # NestJS 백엔드 애플리케이션
 │   ├── src/
+│   │   ├── api/          # API 관련 모듈
 │   │   ├── auth/         # JWT 인증 모듈
 │   │   ├── oauth2/       # OAuth2 핵심 구현
 │   │   ├── cache/        # Redis 캐시 설정
-│   │   ├── user/         # 사용자 엔티티 및 서비스
-│   │   ├── client/       # OAuth2 클라이언트 엔티티
-│   │   ├── token/        # 토큰 엔티티 및 관리
-│   │   ├── scope/        # 권한 범위 엔티티
-│   │   ├── authorization-code/  # 인가 코드 엔티티
+│   │   ├── common/       # 공통 모듈 및 파이프
+│   │   ├── config/       # 애플리케이션 설정
+│   │   ├── constants/    # 상수 정의
+│   │   ├── dashboard/    # 대시보드 API
 │   │   ├── database/     # 데이터베이스 설정 및 시딩
+│   │   ├── logging/      # 로깅 설정
 │   │   ├── migrations/   # 데이터베이스 마이그레이션
-│   │   └── utils/        # 유틸리티 (암호화, ID 생성 등)
+│   │   ├── profile/      # 사용자 프로필 관리
+│   │   ├── scripts/      # 유틸리티 스크립트
+│   │   ├── settings/     # 설정 관리
+│   │   ├── types/        # TypeScript 타입 정의
+│   │   ├── upload/       # 파일 업로드 처리
+│   │   └── utils/        # 유틸리티 함수
 │   └── ...
 ├── frontend/             # SvelteKit 프론트엔드 애플리케이션
 │   ├── src/
 │   │   ├── routes/       # 페이지 라우트
 │   │   │   ├── auth/     # 로그인/회원가입 페이지
 │   │   │   ├── dashboard/  # 사용자 대시보드
-│   │   │   ├── oauth/    # OAuth2 동의 페이지
-│   │   │   └── callback/ # OAuth2 콜백 페이지
+│   │   │   ├── oauth2/   # OAuth2 동의 페이지
+│   │   │   ├── callback/ # OAuth2 콜백 페이지
+│   │   │   ├── docs/     # 문서 페이지
+│   │   │   └── example-form/ # 예제 폼
 │   │   ├── lib/          # 재사용 가능한 컴포넌트
 │   │   │   ├── components/  # UI 컴포넌트
 │   │   │   ├── stores/   # Svelte 스토어
@@ -263,14 +273,21 @@ FlowAuth/
 │   └── ...
 ├── shared/               # 공유 유틸리티 및 타입 정의
 │   ├── src/
-│   │   ├── permissions.ts    # 권한 상수 및 유틸리티
 │   │   ├── constants.ts      # 공유 상수 정의
 │   │   ├── utils.ts          # 공통 유틸리티 함수
 │   │   └── index.ts          # 메인 익스포트 파일
 │   ├── package.json          # npm 패키지 설정
 │   ├── tsconfig.json         # TypeScript 설정
 │   └── dist/                 # 컴파일된 JavaScript 파일
-├── .gitmodules           # Git 서브모듈 설정
+├── sdk/                   # OAuth2 클라이언트 SDK
+│   ├── src/               # SDK 소스 코드
+│   ├── test/              # SDK 테스트
+│   ├── package.json       # SDK 패키지 설정
+│   └── README.md          # SDK 문서
+├── docker-compose.yml     # Docker Compose 설정
+├── deploy.sh             # 배포 스크립트
+├── OAUTH2_GUIDE.md       # OAuth2 가이드 문서
+├── LICENSE               # 라이선스 파일
 └── README.md
 ```
 
@@ -565,7 +582,7 @@ REDIS_PASSWORD=your-redis-password
 
 # JWT
 JWT_SECRET=your-jwt-secret
-JWT_REFRESH_SECRET=your-jwt-refresh-secret
+JWT_EXPIRES_IN=1h
 
 # OAuth2
 OAUTH2_ISSUER=https://your-domain.com
@@ -575,9 +592,10 @@ FRONTEND_URL=https://your-frontend-domain.com
 RECAPTCHA_SECRET_KEY=your-recaptcha-secret-key
 RECAPTCHA_SCORE_THRESHOLD=0.5
 
-# 기타
+# 애플리케이션 설정
 NODE_ENV=production
 PORT=3000
+TZ=Asia/Seoul
 ```
 
 ## API 문서
@@ -631,17 +649,17 @@ FlowAuth는 프론트엔드와 백엔드 간 코드 중복을 방지하고 일�
 
 ### 공유 모듈의 역할
 
-- **권한 관리**: 중앙화된 권한 상수 및 유틸리티 함수
+- **상수 관리**: 중앙화된 상수 정의 및 공유
+- **유틸리티 함수**: 공통으로 사용되는 유틸리티 함수 제공
 - **타입 안전성**: 프론트엔드와 백엔드 간 공유 타입 정의
-- **코드 재사용**: 공통 비즈니스 로직 및 유틸리티 함수
-- **일관성 유지**: 권한 및 상수 값의 일관된 사용 보장
+- **코드 재사용**: 공통 로직 및 헬퍼 함수의 재사용
+- **일관성 유지**: 상수 값의 일관된 사용 보장
 
 ### 공유 모듈 구조
 
 ```
 shared/
 ├── src/
-│   ├── permissions.ts    # 권한 상수 및 유틸리티
 │   ├── constants.ts      # 공유 상수 정의
 │   ├── utils.ts          # 공통 유틸리티 함수
 │   └── index.ts          # 메인 익스포트 파일
@@ -652,23 +670,40 @@ shared/
 
 ### 주요 기능
 
-#### 권한 관리 (permissions.ts)
+#### 권한 관리 (constants.ts & utils.ts)
 
 ```typescript
 // 권한 비트마스크 상수
 export const PERMISSIONS = {
-  USER_READ: 1 << 0, // 사용자 정보 읽기
-  USER_WRITE: 1 << 1, // 사용자 정보 쓰기
-  CLIENT_READ: 1 << 2, // 클라이언트 정보 읽기
-  CLIENT_WRITE: 1 << 3, // 클라이언트 정보 쓰기
-  // ... 기타 권한들
-} as const;
+  // 사용자 권한
+  READ_USER: 1 << 0, // 1
+  WRITE_USER: 1 << 1, // 2
+  DELETE_USER: 1 << 2, // 4
 
-// 역할별 기본 권한 매핑
-export const ROLE_PERMISSIONS = {
-  USER: PERMISSIONS.USER_READ,
-  DEVELOPER: PERMISSIONS.USER_READ | PERMISSIONS.CLIENT_READ | PERMISSIONS.CLIENT_WRITE,
-  ADMIN: Object.values(PERMISSIONS).reduce((acc, perm) => acc | perm, 0),
+  // 클라이언트 권한
+  READ_CLIENT: 1 << 3, // 8
+  WRITE_CLIENT: 1 << 4, // 16
+  DELETE_CLIENT: 1 << 5, // 32
+
+  // 토큰 권한
+  READ_TOKEN: 1 << 6, // 64
+  WRITE_TOKEN: 1 << 7, // 128
+  DELETE_TOKEN: 1 << 8, // 256
+
+  // 시스템 권한
+  MANAGE_USERS: 1 << 9, // 512
+  MANAGE_SYSTEM: 1 << 10, // 1024
+
+  // 대시보드 권한
+  READ_DASHBOARD: 1 << 11, // 2048
+  WRITE_DASHBOARD: 1 << 12, // 4096
+  MANAGE_DASHBOARD: 1 << 13, // 8192
+
+  // 업로드 권한
+  UPLOAD_FILE: 1 << 14, // 16384
+
+  // ADMIN 권한
+  ADMIN_ACCESS: 1 << 31, // 2147483648
 } as const;
 
 // 권한 유틸리티 클래스
@@ -677,12 +712,20 @@ export class PermissionUtils {
     return (userPermissions & requiredPermission) === requiredPermission;
   }
 
-  static addPermission(currentPermissions: number, permission: number): number {
-    return currentPermissions | permission;
+  static hasAnyPermission(userPermissions: number, requiredPermissions: number[]): boolean {
+    return requiredPermissions.some((permission) => this.hasPermission(userPermissions, permission));
   }
 
-  static removePermission(currentPermissions: number, permission: number): number {
-    return currentPermissions & ~permission;
+  static hasAllPermissions(userPermissions: number, requiredPermissions: number[]): boolean {
+    return requiredPermissions.every((permission) => this.hasPermission(userPermissions, permission));
+  }
+
+  static addPermissions(currentPermissions: number, permissionsToAdd: number[]): number {
+    return permissionsToAdd.reduce((acc, permission) => acc | permission, currentPermissions);
+  }
+
+  static removePermissions(currentPermissions: number, permissionsToRemove: number[]): number {
+    return permissionsToRemove.reduce((acc, permission) => acc & ~permission, currentPermissions);
   }
 }
 ```
@@ -690,30 +733,37 @@ export class PermissionUtils {
 #### 상수 정의 (constants.ts)
 
 ```typescript
-// API 응답 상태 코드
-export const API_STATUS = {
-  SUCCESS: 200,
-  CREATED: 201,
-  BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  INTERNAL_ERROR: 500,
+// JWT 관련 상수들
+export const JWT_CONSTANTS = {
+  SECRET_KEY_FALLBACK: "your-secret-key",
+  EXPIRES_IN: "1h",
+  ALGORITHMS: ["HS256"] as const,
+  TOKEN_TYPE: "access" as const,
 } as const;
 
-// 사용자 역할
-export const USER_ROLES = {
+// 토큰 타입 상수들
+export const TOKEN_TYPES = {
+  LOGIN: "login",
+  OAUTH2: "oauth2",
+} as const;
+
+// 사용자 역할 및 권한 매핑
+export const ROLES = {
   USER: "user",
   DEVELOPER: "developer",
   ADMIN: "admin",
 } as const;
 
-// OAuth2 스코프
-export const OAUTH2_SCOPES = {
-  READ: "read",
-  WRITE: "write",
-  PROFILE: "profile",
-  EMAIL: "email",
+export const ROLE_PERMISSIONS = {
+  [ROLES.USER]: PERMISSIONS.READ_USER | PERMISSIONS.READ_DASHBOARD,
+  [ROLES.DEVELOPER]:
+    PERMISSIONS.READ_USER |
+    PERMISSIONS.WRITE_USER |
+    PERMISSIONS.READ_CLIENT |
+    PERMISSIONS.WRITE_CLIENT |
+    PERMISSIONS.READ_DASHBOARD |
+    PERMISSIONS.WRITE_DASHBOARD,
+  [ROLES.ADMIN]: Object.values(PERMISSIONS).reduce((acc, perm) => acc | perm, 0),
 } as const;
 ```
 
@@ -760,6 +810,64 @@ const canEditUser = PermissionUtils.hasPermission(currentUser.permissions, PERMI
 if (response.status === API_STATUS.SUCCESS) {
   // 성공 처리
 }
+```
+
+## OAuth2 클라이언트 SDK
+
+FlowAuth는 외부 개발자들이 쉽게 OAuth2 인증을 통합할 수 있도록 TypeScript/JavaScript SDK를 제공합니다.
+
+### SDK 특징
+
+- **간편한 설치**: npm을 통한 간편한 설치 및 사용
+- **타입 안전성**: 완전한 TypeScript 지원 및 타입 정의
+- **OAuth2 표준 준수**: Authorization Code Grant 플로우 완전 지원
+- **자동 토큰 관리**: 액세스 토큰 및 리프레시 토큰 자동 관리
+- **에러 처리**: 포괄적인 에러 처리 및 사용자 친화적 메시지
+- **다양한 환경 지원**: 브라우저 및 Node.js 환경 모두 지원
+
+### 설치 및 사용
+
+```bash
+npm install @flowauth/sdk
+```
+
+```typescript
+import { OAuth2Client } from "@flowauth/sdk";
+
+const client = new OAuth2Client({
+  clientId: "your-client-id",
+  clientSecret: "your-client-secret",
+  redirectUri: "http://localhost:3000/callback",
+  authorizationEndpoint: "https://flowauth.example.com/oauth2/authorize",
+  tokenEndpoint: "https://flowauth.example.com/oauth2/token",
+});
+
+// 인증 URL 생성
+const authUrl = client.getAuthorizationUrl({
+  scope: ["read", "write"],
+  state: "random-state",
+});
+
+// 콜백에서 토큰 교환
+const tokens = await client.exchangeCodeForTokens(code, state);
+
+// API 호출
+const userInfo = await client.request("/api/user/profile");
+```
+
+### SDK 구조
+
+```
+sdk/
+├── src/
+│   ├── client.ts          # 메인 OAuth2 클라이언트
+│   ├── types.ts           # TypeScript 타입 정의
+│   ├── utils.ts           # 유틸리티 함수
+│   └── index.ts           # 메인 익스포트 파일
+├── test/                  # 단위 테스트
+├── package.json           # SDK 패키지 설정
+├── tsconfig.json          # TypeScript 설정
+└── README.md              # SDK 상세 문서
 ```
 
 ## Redis 캐싱 시스템
