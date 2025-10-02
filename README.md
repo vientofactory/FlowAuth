@@ -26,6 +26,7 @@ FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을
 - **사용자 유형 분리**: 일반 사용자와 개발자 역할 구분
 - **맞춤형 대시보드**: 사용자 유형별 최적화된 인터페이스
 - **역할 기반 접근 제어**: 세밀한 권한 관리 시스템
+- **공유 모듈 아키텍처**: 프론트엔드와 백엔드 간 중앙화된 권한 및 유틸리티 공유
 - **Redis 캐싱**: 고성능 분산 캐싱으로 성능 최적화
 - **구조화된 로깅**: Winston 기반 보안 이벤트 및 감사 로그
 
@@ -35,10 +36,12 @@ FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을
 flowchart LR
    FE[Frontend<br/>SvelteKit]
    BE[Backend<br/>NestJS]
+   SHARED[Shared<br/>Module]
    DB[Database<br/>MariaDB]
    REDIS[Cache<br/>Redis]
 
-   FE <--> BE
+   FE <--> SHARED
+   BE <--> SHARED
    BE <--> DB
    BE <--> REDIS
 
@@ -258,6 +261,15 @@ FlowAuth/
 │   │   │   └── utils/    # 유틸리티 함수
 │   │   └── ...
 │   └── ...
+├── shared/               # 공유 유틸리티 및 타입 정의
+│   ├── src/
+│   │   ├── permissions.ts    # 권한 상수 및 유틸리티
+│   │   ├── constants.ts      # 공유 상수 정의
+│   │   ├── utils.ts          # 공통 유틸리티 함수
+│   │   └── index.ts          # 메인 익스포트 파일
+│   ├── package.json          # npm 패키지 설정
+│   ├── tsconfig.json         # TypeScript 설정
+│   └── dist/                 # 컴파일된 JavaScript 파일
 ├── .gitmodules           # Git 서브모듈 설정
 └── README.md
 ```
@@ -612,6 +624,143 @@ FlowAuth는 모든 개발자의 기여를 환영합니다! 아래 절차에 따�
 
 - **이슈**: [GitHub Issues](https://github.com/vientofactory/FlowAuth/issues)
 - **토론**: [GitHub Discussions](https://github.com/vientofactory/FlowAuth/discussions)
+
+## 공유 모듈 (Shared Module)
+
+FlowAuth는 프론트엔드와 백엔드 간 코드 중복을 방지하고 일관성을 유지하기 위해 공유 모듈을 사용합니다.
+
+### 공유 모듈의 역할
+
+- **권한 관리**: 중앙화된 권한 상수 및 유틸리티 함수
+- **타입 안전성**: 프론트엔드와 백엔드 간 공유 타입 정의
+- **코드 재사용**: 공통 비즈니스 로직 및 유틸리티 함수
+- **일관성 유지**: 권한 및 상수 값의 일관된 사용 보장
+
+### 공유 모듈 구조
+
+```
+shared/
+├── src/
+│   ├── permissions.ts    # 권한 상수 및 유틸리티
+│   ├── constants.ts      # 공유 상수 정의
+│   ├── utils.ts          # 공통 유틸리티 함수
+│   └── index.ts          # 메인 익스포트 파일
+├── package.json          # npm 패키지 설정
+├── tsconfig.json         # TypeScript 설정
+└── dist/                 # 컴파일된 JavaScript 파일
+```
+
+### 주요 기능
+
+#### 권한 관리 (permissions.ts)
+
+```typescript
+// 권한 비트마스크 상수
+export const PERMISSIONS = {
+  USER_READ: 1 << 0, // 사용자 정보 읽기
+  USER_WRITE: 1 << 1, // 사용자 정보 쓰기
+  CLIENT_READ: 1 << 2, // 클라이언트 정보 읽기
+  CLIENT_WRITE: 1 << 3, // 클라이언트 정보 쓰기
+  // ... 기타 권한들
+} as const;
+
+// 역할별 기본 권한 매핑
+export const ROLE_PERMISSIONS = {
+  USER: PERMISSIONS.USER_READ,
+  DEVELOPER: PERMISSIONS.USER_READ | PERMISSIONS.CLIENT_READ | PERMISSIONS.CLIENT_WRITE,
+  ADMIN: Object.values(PERMISSIONS).reduce((acc, perm) => acc | perm, 0),
+} as const;
+
+// 권한 유틸리티 클래스
+export class PermissionUtils {
+  static hasPermission(userPermissions: number, requiredPermission: number): boolean {
+    return (userPermissions & requiredPermission) === requiredPermission;
+  }
+
+  static addPermission(currentPermissions: number, permission: number): number {
+    return currentPermissions | permission;
+  }
+
+  static removePermission(currentPermissions: number, permission: number): number {
+    return currentPermissions & ~permission;
+  }
+}
+```
+
+#### 상수 정의 (constants.ts)
+
+```typescript
+// API 응답 상태 코드
+export const API_STATUS = {
+  SUCCESS: 200,
+  CREATED: 201,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  INTERNAL_ERROR: 500,
+} as const;
+
+// 사용자 역할
+export const USER_ROLES = {
+  USER: "user",
+  DEVELOPER: "developer",
+  ADMIN: "admin",
+} as const;
+
+// OAuth2 스코프
+export const OAUTH2_SCOPES = {
+  READ: "read",
+  WRITE: "write",
+  PROFILE: "profile",
+  EMAIL: "email",
+} as const;
+```
+
+### Docker 통합
+
+공유 모듈은 Docker 빌드 과정에서 자동으로 컴파일되어 각 서비스 컨테이너에 포함됩니다:
+
+```dockerfile
+# 공유 모듈 빌드 및 설치
+COPY ./shared ./shared
+RUN sed -i 's|"file:../shared"|"file:./shared"|g' package.json && npm install
+WORKDIR /app/shared
+RUN npm ci && npm run build
+RUN cp -r /app/shared/dist/* /app/node_modules/@flowauth/shared/
+```
+
+### 사용 예시
+
+#### 백엔드에서 사용
+
+```typescript
+import { PERMISSIONS, PermissionUtils, USER_ROLES } from "@flowauth/shared";
+
+// 권한 확인
+if (PermissionUtils.hasPermission(user.permissions, PERMISSIONS.USER_WRITE)) {
+  // 사용자 정보 수정 로직
+}
+
+// 역할 확인
+if (user.role === USER_ROLES.ADMIN) {
+  // 관리자 전용 기능
+}
+```
+
+#### 프론트엔드에서 사용
+
+```typescript
+import { PERMISSIONS, USER_ROLES, API_STATUS } from "@flowauth/shared";
+
+// 권한 기반 UI 렌더링
+const canEditUser = PermissionUtils.hasPermission(currentUser.permissions, PERMISSIONS.USER_WRITE);
+
+// API 응답 처리
+if (response.status === API_STATUS.SUCCESS) {
+  // 성공 처리
+}
+```
 
 ## Redis 캐싱 시스템
 
