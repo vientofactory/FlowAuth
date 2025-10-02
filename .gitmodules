@@ -9,3 +9,6 @@
 [submodule "sdk"]
 	path = sdk
 	url = https://github.com/vientofactory/FlowAuth-SDK.git
+[submodule "shared"]
+	path = shared
+	url = https://github.com/vientofactory/FlowAuth-Shared.git
