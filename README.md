@@ -5,19 +5,19 @@
 
 <img width="600" height="164" alt="logo_1" src="https://github.com/user-attachments/assets/04383214-745c-4b18-8545-36c3cda04ee6" />
 
-FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을 준수하는 모던한 인증 및 권한 부여 시스템입니다. 외부 서비스 제공자들이 쉽게 애플리케이션을 등록하고 관리할 수 있는 플랫폼을 제공합니다.
+FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)과 [OpenID Connect 1.0 표준](https://openid.net/specs/openid-connect-core-1_0.html)을 준수하는 모던한 인증 및 권한 부여 시스템입니다. 외부 서비스 제공자들이 쉽게 애플리케이션을 등록하고 관리할 수 있는 플랫폼을 제공합니다.
 
 ## 특징
 
-- **완전한 OAuth2 구현**: Authorization Code Grant 플로우 완전 지원
-- **표준 준수**: OAuth2 RFC 6749 표준 완전 준수
+- **완전한 OAuth2/OIDC 구현**: Authorization Code Grant 플로우 완전 지원 및 OpenID Connect 1.0 표준 준수
+- **표준 준수**: OAuth2 RFC 6749 및 OpenID Connect Core 1.0 표준 완전 준수
 - **모던한 아키텍처**: NestJS (백엔드) + SvelteKit (프론트엔드)
 - **심플 & 모던 UI/UX**: 직관적이고 아름다운 사용자 인터페이스
-- **개발자 친화적**: OAuth2 테스터 및 완전한 대시보드 제공
+- **개발자 친화적**: OAuth2/OIDC 테스터 및 완전한 대시보드 제공
 - **유연한 서비스 등록**: 외부 개발자들이 쉽게 애플리케이션 등록 가능
 - **세밀한 권한 제어**: Scope 기반 권한 관리 시스템
 - **TypeORM 통합**: 효율적인 데이터베이스 관리
-- **TypeScript 지원**: 타입 안전성과 개발 생산성 향상
+- **TypeScript 지원**: 타입 안전성과 개발 생산 생산성 향상
 - **완전한 토큰 관리**: 액세스/리프레시 토큰 생성, 조회, 취소
 - **PKCE 지원**: Proof Key for Code Exchange 보안 강화
 - **Docker 지원**: 완전한 컨테이너화된 개발/배포 환경
@@ -26,7 +26,7 @@ FlowAuth는 [OAuth 2.0 표준](https://datatracker.ietf.org/doc/html/rfc6749)을
 - **사용자 유형 분리**: 일반 사용자와 개발자 역할 구분
 - **맞춤형 대시보드**: 사용자 유형별 최적화된 인터페이스
 - **역할 기반 접근 제어**: 세밀한 권한 관리 시스템
-- **OAuth2 클라이언트 SDK**: 외부 개발자들이 쉽게 통합할 수 있는 SDK 제공
+- **OAuth2/OIDC 클라이언트 SDK**: 외부 개발자들이 쉽게 통합할 수 있는 SDK 제공
 - **공유 모듈 아키텍처**: 프론트엔드와 백엔드 간 중앙화된 권한 및 유틸리티 공유
 - **Redis 캐싱**: 고성능 분산 캐싱으로 성능 최적화
 - **구조화된 로깅**: Winston 기반 보안 이벤트 및 감사 로그
@@ -55,7 +55,7 @@ flowchart LR
    end
 
    subgraph "Backend Layer"
-      BE_OAuth2[OAuth2 서버]
+      BE_OAuth2[OAuth2/OIDC 서버]
       BE_JWT[JWT 인증]
       BE_Token[토큰 관리]
       BE_API[API 엔드포인트]
@@ -286,7 +286,7 @@ FlowAuth/
 │   └── README.md          # SDK 문서
 ├── docker-compose.yml     # Docker Compose 설정
 ├── deploy.sh             # 배포 스크립트
-├── OAUTH2_GUIDE.md       # OAuth2 가이드 문서
+├── OAUTH2_GUIDE.md       # OAuth2/OIDC 가이드 문서
 ├── LICENSE               # 라이선스 파일
 └── README.md
 ```
@@ -479,11 +479,11 @@ npm run lint          # 코드 린팅
 
 #### 백엔드
 
-- **완전한 OAuth2 구현**: Authorization Code Grant 플로우
+- **완전한 OAuth2/OIDC 구현**: Authorization Code Grant 플로우 및 OpenID Connect 1.0 지원
 - **사용자 관리**: 등록, 로그인, 프로필 관리 API
-- **클라이언트 관리**: OAuth2 클라이언트 CRUD 작업
+- **클라이언트 관리**: OAuth2/OIDC 클라이언트 CRUD 작업
 - **토큰 관리**: 액세스 토큰 및 리프레시 토큰 생성/관리
-- **권한 범위(Scope) 시스템**: 세밀한 권한 제어
+- **권한 범위(Scope) 시스템**: 세밀한 권한 제어 (openid, profile, email)
 - **인가 코드 관리**: 보안 인가 코드 생성 및 검증
 - **JWT 인증**: 안전한 토큰 기반 인증
 - **보안 강화**: 헬멧, CORS, 레이트 리미팅 적용
@@ -616,6 +616,7 @@ TZ=Asia/Seoul
 - **토큰 만료 관리**
 - **2단계 인증 (2FA)**: TOTP 기반 추가 보안 계층
 - **역할 기반 액세스 제어 (RBAC)**: 세부적인 권한 관리
+- **OpenID Connect 지원**: 표준 ID 토큰 및 UserInfo 엔드포인트
 
 ## 기여 가이드
 
@@ -812,15 +813,15 @@ if (response.status === API_STATUS.SUCCESS) {
 }
 ```
 
-## OAuth2 클라이언트 SDK
+## OAuth2/OIDC 클라이언트 SDK
 
-FlowAuth는 외부 개발자들이 쉽게 OAuth2 인증을 통합할 수 있도록 TypeScript/JavaScript SDK를 제공합니다.
+FlowAuth는 외부 개발자들이 쉽게 OAuth2/OIDC 인증을 통합할 수 있도록 TypeScript/JavaScript SDK를 제공합니다.
 
 ### SDK 특징
 
 - **간편한 설치**: npm을 통한 간편한 설치 및 사용
 - **타입 안전성**: 완전한 TypeScript 지원 및 타입 정의
-- **OAuth2 표준 준수**: Authorization Code Grant 플로우 완전 지원
+- **OAuth2/OIDC 표준 준수**: Authorization Code Grant 플로우 및 OpenID Connect 1.0 완전 지원
 - **자동 토큰 관리**: 액세스 토큰 및 리프레시 토큰 자동 관리
 - **에러 처리**: 포괄적인 에러 처리 및 사용자 친화적 메시지
 - **다양한 환경 지원**: 브라우저 및 Node.js 환경 모두 지원

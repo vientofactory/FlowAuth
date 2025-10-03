@@ -37,7 +37,7 @@ FlowAuth는 OAuth 2.0 Authorization Code Grant 플로우를 완전히 지원합�
 **예시 요청:**
 
 ```
-GET {BACKEND_HOST}/oauth2/authorize?response_type=code&client_id=your-client-id&redirect_uri=https://your-app.com/callback&scope=read:user%20read:profile&state=random-state
+GET {BACKEND_HOST}/oauth2/authorize?response_type=code&client_id=your-client-id&redirect_uri=https://your-app.com/callback&scope=openid%20profile%20email&state=random-state
 ```
 
 **응답:**
@@ -62,7 +62,7 @@ GET {BACKEND_HOST}/oauth2/authorize?response_type=code&client_id=your-client-id&
   "client_id": "your-client-id",
   "redirect_uri": "https://your-app.com/callback",
   "response_type": "code",
-  "scope": "read:user read:profile",
+  "scope": "openid profile email",
   "state": "random-state"
 }
 ```
@@ -98,7 +98,7 @@ code_verifier=pkce_code_verifier (PKCE를 사용한 경우)
   "token_type": "Bearer",
   "expires_in": 3600,
   "refresh_token": "refresh_token_string",
-  "scope": "read:user read:profile"
+  "scope": "openid profile email"
 }
 ```
 
@@ -126,8 +126,9 @@ Authorization: Bearer <access_token>
 **스코프별 반환 정보:**
 
 - **항상 포함:** `sub` (사용자 식별자)
-- **`email` 스코프:** `email` (사용자 이메일 주소)
-- **`read:profile` 스코프:** `username`, `roles` (사용자명, 역할 정보)
+- **`openid` 스코프:** `iss`, `aud`, `exp`, `iat`, `auth_time` (OpenID Connect 표준 클레임)
+- **`profile` 스코프:** `username`, `name`, `preferred_username` (사용자 프로필 정보)
+- **`email` 스코프:** `email`, `email_verified` (사용자 이메일 정보)
 
 **예시 응답:**
 
@@ -159,7 +160,7 @@ Authorization: Basic <base64(client_id:client_secret)>
 grant_type=refresh_token
 client_id=your-client-id
 refresh_token=your_refresh_token
-scope=read:user read:profile (선택사항, 기존 스코프 유지 시 생략)
+scope=openid profile email (선택사항, 기존 스코프 유지 시 생략)
 ```
 
 **성공 응답 (200):**
@@ -170,38 +171,23 @@ scope=read:user read:profile (선택사항, 기존 스코프 유지 시 생략)
   "token_type": "Bearer",
   "expires_in": 3600,
   "refresh_token": "new_refresh_token",
-  "scope": "read:user read:profile"
+  "scope": "openid profile email"
 }
 ```
 
 ## 지원되는 스코프 (Scopes)
 
-FlowAuth에서 지원하는 OAuth2 스코프입니다:
+FlowAuth에서 지원하는 OpenID Connect 및 OAuth2 스코프입니다:
 
-### 사용자 정보 관련
+### OpenID Connect 표준 스코프
 
-- `read:user` - 사용자 기본 정보 읽기
-- `email` - 사용자 이메일 주소 읽기
+- `openid` - OpenID Connect 인증을 위한 기본 스코프 (필수)
+- `profile` - 사용자 프로필 정보 (이름, 사용자명 등)
+- `email` - 사용자 이메일 주소 및 검증 상태
 
-### 프로필 관련
+### 레거시 호환성 스코프
 
-- `read:profile` - 사용자 프로필 읽기
-
-### 파일 관리
-
-- `upload:file` - 파일 업로드
-- `read:file` - 파일 읽기
-- `delete:file` - 파일 삭제
-
-### 클라이언트 관리
-
-- `read:client` - 클라이언트 정보 읽기
-- `write:client` - 클라이언트 정보 수정
-- `delete:client` - 클라이언트 삭제
-
-### 기본 권한
-
-- `basic` - 기본 접근 권한
+- `identify` - 사용자 기본 정보 읽기 (레거시, `profile` 권장)
 
 ## 보안 기능
 
@@ -431,7 +417,7 @@ console.log('Code Challenge:', codeChallenge);
 # 인증 URL 생성 예제
 CLIENT_ID="your-client-id"
 REDIRECT_URI="https://yourapp.com/callback"
-SCOPE="read:user"
+SCOPE="openid profile email"
 STATE="random-state-value"
 CODE_CHALLENGE="generated-code-challenge"
 
@@ -520,7 +506,7 @@ async function generateState() {
 
 ```javascript
 // 1. 인증 초기화
-async function initializeAuth(clientId, redirectUri, scopes = ["read:user"]) {
+async function initializeAuth(clientId, redirectUri, scopes = ["openid", "profile", "email"]) {
   const state = await generateState();
   const pkce = await generatePKCE();
 
@@ -653,7 +639,7 @@ const REDIRECT_URI = "https://yourapp.com/callback";
 // 인증 시작
 document.getElementById("login-btn").addEventListener("click", async () => {
   try {
-    const { authUrl } = await initializeAuth(CLIENT_ID, REDIRECT_URI, ["read:user"]);
+    const { authUrl } = await initializeAuth(CLIENT_ID, REDIRECT_URI, ["openid", "profile", "email"]);
     window.location.href = authUrl; // 리다이렉트
   } catch (error) {
     console.error("Login failed:", error);
@@ -724,7 +710,7 @@ class OAuth2Client:
         self.redirect_uri = redirect_uri
         self.base_url = base_url
 
-    def initialize_auth(self, scopes=['read:user']):
+    def initialize_auth(self, scopes=['openid', 'profile', 'email']):
         """인증 초기화"""
         state = generate_state()
         pkce = generate_pkce()
