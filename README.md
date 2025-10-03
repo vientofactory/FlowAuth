@@ -581,6 +581,17 @@ REDIS_PASSWORD=your-redis-password
 JWT_SECRET=your-jwt-secret
 JWT_EXPIRES_IN=1h
 
+# OIDC (RSA key pair - required for enhanced security)
+# RSA key generation methods:
+# 1. Manual generation:
+#    openssl genrsa -out private.pem 2048
+#    openssl rsa -in private.pem -pubout -out public.pem
+# 2. Automatic generation (recommended):
+#    cd backend && ./generate_rsa_keys.sh
+# 생성된 키를 환경변수에 설정
+RSA_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour RSA Private Key Here\n-----END PRIVATE KEY-----"
+RSA_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\nYour RSA Public Key Here\n-----END PUBLIC KEY-----"
+
 # OAuth2
 OAUTH2_ISSUER=https://your-domain.com
 FRONTEND_URL=https://your-frontend-domain.com
@@ -604,6 +615,7 @@ TZ=Asia/Seoul
 ## 보안 기능
 
 - **JWT 토큰 기반 인증**
+- **RSA 서명**: ID 토큰의 보안 서명 (RS256 알고리즘)
 - **비밀번호 해싱 (bcrypt)**
 - **헬멧 (Helmet) 보안 헤더**
 - **CORS 설정**

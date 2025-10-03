@@ -1,6 +1,14 @@
-# OAuth2 인증 시스템 가이드
+# OAuth2/OpenID Connect 인증 시스템 가이드
 
-이 문서는 FlowAuth의 OAuth2 인증 과정에 대해 설명합니다.
+이 문서는 FlowAuth의 OAuth2 및 OpenID Connect (OIDC) 인증 과정에 대해 설명합니다.
+
+FlowAuth는 다음과 같은 최신 보안 기능을 지원합니다:
+
+- **RSA 서명 JWT 토큰**: RS256 알고리즘을 사용한 암호화 서명
+- **PKCE (Proof Key for Code Exchange)**: Authorization Code Interception Attack 방지
+- **Nonce 파라미터**: Replay Attack 방지
+- **ID 토큰 검증**: OIDC 표준 준수
+- **JWKS 엔드포인트**: 공개키 배포 및 키 로테이션 지원
 
 `{BACKEND_HOST}`, `{FRONTEND_HOST}`는 실제 서비스의 도메인 주소로 변경해야 합니다.
 
@@ -11,9 +19,23 @@
   - `{FRONTEND_HOST}`: https://auth.viento.me
 - 실제 운영 환경에서는 각자의 서비스 도메인으로 대체하세요.
 
-## Authorization Code Grant 플로우
+## 지원되는 인증 플로우
 
-FlowAuth는 OAuth 2.0 Authorization Code Grant 플로우를 완전히 지원합니다.
+### Authorization Code Grant (OAuth2)
+
+표준 OAuth2 Authorization Code Grant 플로우를 지원합니다.
+
+### Authorization Code + ID Token (OIDC)
+
+OpenID Connect를 지원하며, Authorization Code와 함께 ID 토큰을 반환합니다.
+
+**응답 타입:** `code id_token`
+
+**필수 스코프:** `openid`
+
+**추가 보안 파라미터:**
+
+- `nonce` - Replay Attack 방지를 위한 임의 값
 
 ### 1. 인증 요청 (Authorization Request)
 
@@ -23,28 +45,41 @@ FlowAuth는 OAuth 2.0 Authorization Code Grant 플로우를 완전히 지원합�
 
 **필수 파라미터:**
 
-- `response_type=code` - 응답 타입
+- `response_type` - 응답 타입 (`code` 또는 `code id_token`)
 - `client_id` - 클라이언트 식별자
 - `redirect_uri` - 인증 완료 후 리다이렉트될 URI
 - `state` - CSRF 방지를 위한 상태값 (보안상 필수)
 
 **선택 파라미터:**
 
-- `scope` - 요청할 권한 스코프 (공백으로 구분)
+- `scope` - 요청할 권한 스코프 (공백으로 구분, `openid` 포함 시 OIDC 활성화)
 - `code_challenge` - PKCE 코드 챌린지
 - `code_challenge_method` - PKCE 코드 챌린지 메서드 (S256 권장)
+- `nonce` - OIDC nonce 값 (response_type에 `id_token` 포함 시 필수)
 
-**예시 요청:**
+**예시 요청 (OAuth2):**
 
 ```
-GET {BACKEND_HOST}/oauth2/authorize?response_type=code&client_id=your-client-id&redirect_uri=https://your-app.com/callback&scope=openid%20profile%20email&state=random-state
+GET {BACKEND_HOST}/oauth2/authorize?response_type=code&client_id=your-client-id&redirect_uri=https://your-app.com/callback&scope=profile%20email&state=random-state&code_challenge=abc123&code_challenge_method=S256
+```
+
+**예시 요청 (OIDC):**
+
+```
+GET {BACKEND_HOST}/oauth2/authorize?response_type=code%20id_token&client_id=your-client-id&redirect_uri=https://your-app.com/callback&scope=openid%20profile%20email&state=random-state&nonce=xyz789&code_challenge=abc123&code_challenge_method=S256
 ```
 
 **응답:**
 
 - 사용자가 로그인하지 않은 경우: 로그인 페이지로 리다이렉트
 - 사용자가 로그인한 경우: 동의 페이지로 리다이렉트 (`{FRONTEND_HOST}/oauth2/authorize`)
-- 사용자가 동의한 경우: `redirect_uri`로 authorization code와 함께 리다이렉트
+- 사용자가 동의한 경우: `redirect_uri`로 authorization code (및 ID 토큰)와 함께 리다이렉트
+
+**OIDC 응답 예시:**
+
+```
+https://your-app.com/callback?code=auth-code&state=random-state&id_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
 ### 2. 동의 페이지 (Consent Page)
 
@@ -90,11 +125,24 @@ redirect_uri=https://your-app.com/callback (선택사항)
 code_verifier=pkce_code_verifier (PKCE를 사용한 경우)
 ```
 
-**성공 응답 (200):**
+**성공 응답 (200) - OAuth2:**
 
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "refresh_token_string",
+  "scope": "profile email"
+}
+```
+
+**성공 응답 (200) - OIDC:**
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
   "token_type": "Bearer",
   "expires_in": 3600,
   "refresh_token": "refresh_token_string",
@@ -141,6 +189,50 @@ Authorization: Bearer <access_token>
 }
 ```
 
+## JWKS 엔드포인트 (JSON Web Key Set)
+
+RSA 공개키를 배포하는 엔드포인트입니다. ID 토큰의 서명 검증에 사용됩니다.
+
+**엔드포인트:** `GET {BACKEND_HOST}/.well-known/jwks.json`
+
+**응답 예시:**
+
+```json
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "kid": "rsa-key-env",
+      "n": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtmUAmh9K8X1GYTA...",
+      "e": "AQAB",
+      "alg": "RS256"
+    }
+  ]
+}
+```
+
+## OIDC Discovery 문서
+
+OpenID Connect 공급자의 메타데이터를 제공합니다.
+
+**엔드포인트:** `GET {BACKEND_HOST}/.well-known/openid-configuration`
+
+**주요 필드:**
+
+```json
+{
+  "issuer": "{BACKEND_HOST}",
+  "authorization_endpoint": "{BACKEND_HOST}/oauth2/authorize",
+  "token_endpoint": "{BACKEND_HOST}/oauth2/token",
+  "userinfo_endpoint": "{BACKEND_HOST}/oauth2/userinfo",
+  "jwks_uri": "{BACKEND_HOST}/.well-known/jwks.json",
+  "scopes_supported": ["openid", "profile", "email", "identify"],
+  "response_types_supported": ["code", "code id_token"],
+  "id_token_signing_alg_values_supported": ["RS256", "HS256"],
+  "claims_supported": ["sub", "iss", "aud", "exp", "iat", "auth_time", "nonce", "email", "email_verified", "username", "preferred_username", "roles"]
+}
+```
+
 ## 리프래시 토큰 (Refresh Token)
 
 Access Token이 만료되었을 때 새로운 토큰을 발급받습니다.
@@ -181,13 +273,34 @@ FlowAuth에서 지원하는 OpenID Connect 및 OAuth2 스코프입니다:
 
 ### OpenID Connect 표준 스코프
 
-- `openid` - OpenID Connect 인증을 위한 기본 스코프 (필수)
-- `profile` - 사용자 프로필 정보 (이름, 사용자명 등)
-- `email` - 사용자 이메일 주소 및 검증 상태
+- **`openid`** - OpenID Connect 인증 활성화 (ID 토큰 발급)
+
+  - 반환 클레임: `iss`, `sub`, `aud`, `exp`, `iat`, `auth_time`, `nonce`
+
+- **`profile`** - 사용자 프로필 정보
+
+  - 반환 클레임: `username`, `name`, `preferred_username`, `roles`
+
+- **`email`** - 사용자 이메일 정보
+  - 반환 클레임: `email`, `email_verified`
 
 ### 레거시 호환성 스코프
 
-- `identify` - 사용자 기본 정보 읽기 (레거시, `profile` 권장)
+- **`identify`** - 사용자 기본 정보 읽기 (레거시, `profile` 권장)
+  - 반환 클레임: `username`, `roles`
+
+### 스코프 조합 예시
+
+```javascript
+// 기본 OIDC 인증
+const scopes = ["openid", "profile"];
+
+// 전체 프로필 정보
+const scopes = ["openid", "profile", "email"];
+
+// 레거시 호환
+const scopes = ["identify", "email"];
+```
 
 ## 보안 기능
 
@@ -340,6 +453,97 @@ const codeChallenge = await generateCodeChallenge(codeVerifier);
 // POST /oauth2/token
 // grant_type=authorization_code&code=...&code_verifier=...
 ```
+
+### RSA 서명 검증
+
+OIDC ID 토큰의 서명 검증을 위한 RSA 암호화 메커니즘입니다. RS256 알고리즘을 사용하여 토큰의 무결성과 발급자를 보장합니다.
+
+**서명 검증 프로세스:**
+
+```javascript
+// 1. JWKS 엔드포인트에서 공개키 가져오기
+const jwksResponse = await fetch("https://your-domain.com/.well-known/jwks.json");
+const jwks = await jwksResponse.json();
+
+// 2. ID 토큰에서 kid 추출
+const header = JSON.parse(atob(idToken.split(".")[0]));
+const kid = header.kid;
+
+// 3. 해당 kid의 공개키 찾기
+const publicKey = jwks.keys.find((key) => key.kid === kid);
+
+// 4. RSA 서명 검증
+const isValid = await verifyRS256Signature(idToken, publicKey);
+```
+
+**보안 고려사항:**
+
+1. **키 로테이션:**
+
+   - JWKS 엔드포인트에서 최신 키 확인
+   - 캐시된 키의 유효 기간 검증
+
+2. **알고리즘 검증:**
+
+   - 헤더의 alg 필드가 "RS256"인지 확인
+   - 지원하지 않는 알고리즘 거부
+
+3. **키 ID 검증:**
+
+   - kid가 JWKS에 존재하는지 확인
+   - 알 수 없는 kid의 토큰 거부
+
+4. **타임스탬프 검증:**
+   - 토큰의 exp, iat, nbf 클레임 검증
+   - 만료된 토큰 거부
+
+### Nonce 보안
+
+OIDC에서 Replay Attack을 방지하기 위한 nonce 파라미터의 보안 메커니즘입니다. 인증 요청 시 전송된 nonce 값이 ID 토큰에 포함되어 반환됩니다.
+
+**Nonce 검증 프로세스:**
+
+```javascript
+// 1. 인증 요청 시 nonce 생성 및 저장
+const nonce = generateSecureRandomString();
+sessionStorage.setItem("oidc_nonce", nonce);
+
+// 2. 인증 요청에 nonce 포함
+// GET /oauth2/authorize?nonce=xyz789&...
+
+// 3. ID 토큰 수신 후 nonce 검증
+const idTokenPayload = decodeIdToken(idToken);
+const receivedNonce = idTokenPayload.nonce;
+const storedNonce = sessionStorage.getItem("oidc_nonce");
+
+if (receivedNonce !== storedNonce) {
+  throw new Error("Nonce mismatch - possible replay attack");
+}
+
+// 4. 검증 후 nonce 폐기
+sessionStorage.removeItem("oidc_nonce");
+```
+
+**보안 고려사항:**
+
+1. **임의성:**
+
+   - 충분한 엔트로피의 CSPRNG 사용
+   - 예측 불가능한 값 생성
+
+2. **저장 보안:**
+
+   - 서버 사이드 세션에 안전하게 저장
+   - 클라이언트 사이드 저장 시 암호화
+
+3. **일회성 사용:**
+
+   - 검증 후 즉시 폐기
+   - 재사용 방지
+
+4. **타임아웃:**
+   - 인증 요청 후 제한된 시간 내 검증
+   - 만료된 nonce 거부
 
 ### 2단계 인증 (2FA)
 
@@ -963,3 +1167,207 @@ public class OAuth2Client {
     }
 }
 ```
+
+## OIDC 구현 예제
+
+### ID 토큰 검증
+
+OIDC 플로우에서 ID 토큰의 서명 검증 및 클레임 검증 예제입니다.
+
+#### JavaScript/TypeScript
+
+```javascript
+async function verifyIdToken(idToken, nonce) {
+  try {
+    // 1. JWKS 엔드포인트에서 공개키 가져오기
+    const jwksResponse = await fetch("https://your-domain.com/.well-known/jwks.json");
+    const jwks = await jwksResponse.json();
+
+    // 2. ID 토큰 파싱
+    const [headerB64, payloadB64, signatureB64] = idToken.split(".");
+    const header = JSON.parse(atob(headerB64));
+    const payload = JSON.parse(atob(payloadB64));
+
+    // 3. 알고리즘 검증
+    if (header.alg !== "RS256") {
+      throw new Error("Unsupported algorithm");
+    }
+
+    // 4. 키 ID로 공개키 찾기
+    const key = jwks.keys.find((k) => k.kid === header.kid);
+    if (!key) {
+      throw new Error("Key not found");
+    }
+
+    // 5. RSA 공개키 생성
+    const publicKey = await crypto.subtle.importKey("jwk", key, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+
+    // 6. 서명 검증
+    const signature = Uint8Array.from(atob(signatureB64.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+    const data = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
+    const isValid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", publicKey, signature, data);
+
+    if (!isValid) {
+      throw new Error("Invalid signature");
+    }
+
+    // 7. 클레임 검증
+    const now = Math.floor(Date.now() / 1000);
+
+    if (payload.exp < now) {
+      throw new Error("Token expired");
+    }
+
+    if (payload.iat > now) {
+      throw new Error("Token issued in future");
+    }
+
+    if (payload.nonce !== nonce) {
+      throw new Error("Nonce mismatch");
+    }
+
+    return payload;
+  } catch (error) {
+    throw new Error(`ID token verification failed: ${error.message}`);
+  }
+}
+```
+
+#### Python
+
+```python
+import jwt
+import requests
+from cryptography.hazmat.primitives import serialization
+import base64
+
+def verify_id_token(id_token, nonce, issuer_url):
+    try:
+        # 1. JWKS 엔드포인트에서 공개키 가져오기
+        jwks_url = f"{issuer_url}/.well-known/jwks.json"
+        jwks_response = requests.get(jwks_url)
+        jwks = jwks_response.json()
+
+        # 2. ID 토큰 헤더에서 kid 추출
+        header = jwt.get_unverified_header(id_token)
+        kid = header['kid']
+
+        # 3. 해당 키 찾기
+        key = next(k for k in jwks['keys'] if k['kid'] == kid)
+
+        # 4. RSA 공개키 생성
+        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(key)
+
+        # 5. 토큰 검증 (자동으로 서명, 만료시간, 발급자 검증)
+        payload = jwt.decode(
+            id_token,
+            public_key,
+            algorithms=['RS256'],
+            audience='your-client-id',
+            issuer=issuer_url
+        )
+
+        # 6. nonce 검증
+        if payload.get('nonce') != nonce:
+            raise ValueError('Nonce mismatch')
+
+        return payload
+
+    except Exception as e:
+        raise ValueError(f'ID token verification failed: {str(e)}')
+```
+
+#### Java
+
+```java
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.*;
+import com.nimbusds.jwt.*;
+import java.net.URL;
+import java.util.*;
+
+public class OIDCUtils {
+    public static JWTClaimsSet verifyIdToken(String idToken, String nonce, String issuerUrl) throws Exception {
+        try {
+            // 1. ID 토큰 파싱
+            SignedJWT signedJWT = SignedJWT.parse(idToken);
+
+            // 2. JWKS에서 공개키 가져오기
+            URL jwksUrl = new URL(issuerUrl + "/.well-known/jwks.json");
+            JWKSet jwkSet = JWKSet.load(jwksUrl);
+
+            // 3. 키 ID로 공개키 찾기
+            String kid = signedJWT.getHeader().getKeyID();
+            JWK jwk = jwkSet.getKeyByKeyId(kid);
+            if (jwk == null) {
+                throw new Exception("Key not found");
+            }
+
+            // 4. RSA 공개키 생성
+            RSAKey rsaKey = jwk.toRSAKey();
+            RSAPublicKey publicKey = rsaKey.toRSAPublicKey();
+
+            // 5. 서명 검증
+            JWSVerifier verifier = new RSASSAVerifier(publicKey);
+            if (!signedJWT.verify(verifier)) {
+                throw new Exception("Invalid signature");
+            }
+
+            // 6. 클레임 검증
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+
+            // 만료시간 검증
+            Date now = new Date();
+            if (claims.getExpirationTime().before(now)) {
+                throw new Exception("Token expired");
+            }
+
+            // 발급시간 검증
+            if (claims.getIssueTime().after(now)) {
+                throw new Exception("Token issued in future");
+            }
+
+            // nonce 검증
+            if (!Objects.equals(claims.getStringClaim("nonce"), nonce)) {
+                throw new Exception("Nonce mismatch");
+            }
+
+            return claims;
+
+        } catch (Exception e) {
+            throw new Exception("ID token verification failed: " + e.getMessage());
+        }
+    }
+}
+```
+
+### OIDC Discovery 활용
+
+Discovery 문서를 사용하여 엔드포인트 자동 구성 예제입니다.
+
+#### JavaScript/TypeScript
+
+```javascript
+async function initializeOIDC(issuerUrl) {
+  // Discovery 문서 가져오기
+  const discoveryUrl = `${issuerUrl}/.well-known/openid-configuration`;
+  const response = await fetch(discoveryUrl);
+  const config = await response.json();
+
+  return {
+    authorizationEndpoint: config.authorization_endpoint,
+    tokenEndpoint: config.token_endpoint,
+    userinfoEndpoint: config.userinfo_endpoint,
+    jwksUri: config.jwks_uri,
+    issuer: config.issuer,
+    supportedScopes: config.scopes_supported,
+    supportedClaims: config.claims_supported,
+  };
+}
+
+// 사용 예제
+const oidcConfig = await initializeOIDC("https://your-domain.com");
+console.log("Authorization URL:", oidcConfig.authorizationEndpoint);
+```
+
+이러한 구현 예제들을 통해 개발자들은 FlowAuth의 OIDC 기능을 안전하고 효과적으로 통합할 수 있습니다.
