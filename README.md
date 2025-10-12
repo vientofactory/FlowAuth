@@ -925,7 +925,7 @@ docker-compose exec redis redis-cli info memory
 
 ## 중요 변경사항 (Breaking Changes)
 
-### 권한 시스템 업데이트 (2024-10-12)
+### 권한 시스템 업데이트 (2025-10-12)
 
 - **ADMIN_ACCESS 비트 위치 변경**: 31번째 비트 → 30번째 비트
 - **영향**: 관리자 권한을 가진 모든 사용자
