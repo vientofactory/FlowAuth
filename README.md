@@ -838,11 +838,11 @@ FlowAuth는 외부 개발자들이 쉽게 OAuth2/OIDC 인증을 통합할 수 �
 ### 설치 및 사용
 
 ```bash
-npm install @flowauth/sdk
+npm install flowauth-oauth2-client
 ```
 
 ```typescript
-import { OAuth2Client } from "@flowauth/sdk";
+import { OAuth2Client } from "flowauth-oauth2-client";
 
 const client = new OAuth2Client({
   clientId: "your-client-id",
