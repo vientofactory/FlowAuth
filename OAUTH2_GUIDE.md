@@ -226,7 +226,7 @@ OpenID Connect 공급자의 메타데이터를 제공합니다.
   "token_endpoint": "{BACKEND_HOST}/oauth2/token",
   "userinfo_endpoint": "{BACKEND_HOST}/oauth2/userinfo",
   "jwks_uri": "{BACKEND_HOST}/.well-known/jwks.json",
-  "scopes_supported": ["openid", "profile", "email", "identify"],
+  "scopes_supported": ["openid", "profile", "email"],
   "response_types_supported": ["code", "code id_token"],
   "id_token_signing_alg_values_supported": ["RS256", "HS256"],
   "claims_supported": ["sub", "iss", "aud", "exp", "iat", "auth_time", "nonce", "email", "email_verified", "username", "preferred_username", "roles"]
@@ -284,11 +284,6 @@ FlowAuth에서 지원하는 OpenID Connect 및 OAuth2 스코프입니다:
 - **`email`** - 사용자 이메일 정보
   - 반환 클레임: `email`, `email_verified`
 
-### 레거시 호환성 스코프
-
-- **`identify`** - 사용자 기본 정보 읽기 (레거시, `profile` 권장)
-  - 반환 클레임: `username`, `roles`
-
 ### 스코프 조합 예시
 
 ```javascript
@@ -298,8 +293,8 @@ const scopes = ["openid", "profile"];
 // 전체 프로필 정보
 const scopes = ["openid", "profile", "email"];
 
-// 레거시 호환
-const scopes = ["identify", "email"];
+// 이메일만 필요한 경우
+const scopes = ["openid", "email"];
 ```
 
 ## 보안 기능
