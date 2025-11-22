@@ -39,11 +39,11 @@ services:
       context: .
       dockerfile: ./backend/Dockerfile
     restart: unless-stopped
+    env_file:
+      - ./backend/.env
     environment:
       NODE_ENV: production
       TZ: Asia/Seoul
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
     ports:
       - "127.0.0.1:6000:3000"
     depends_on:
@@ -68,6 +68,8 @@ services:
       dockerfile: ./frontend/Dockerfile
     container_name: flowauth-frontend
     restart: unless-stopped
+    env_file:
+      - ./frontend/.env
     environment:
       NODE_ENV: production
       TZ: Asia/Seoul
